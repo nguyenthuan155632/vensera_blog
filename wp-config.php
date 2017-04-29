@@ -25,16 +25,19 @@ define( 'WPCACHEHOME', '/var/www/html/vensera_blog/wp-content/plugins/wp-super-c
 define('DB_NAME', 'vensera_blog');
 
 /** MySQL database username */
-define('DB_USER', 'root');
+// define('DB_USER', 'root');
+define('DB_USER', 'vensera');
 
 /** MySQL database password */
-define('DB_PASSWORD', 'root');
+// define('DB_PASSWORD', 'root');
+define('DB_PASSWORD', '15563200025ff0');
 
 /** MySQL hostname */
-define('DB_HOST', 'localhost');
+// define('DB_HOST', 'localhost');
+define('DB_HOST', 'vensera.cisdtmhkjjzs.ap-northeast-1.rds.amazonaws.com');
 
 /** Database Charset to use in creating database tables. */
-define('DB_CHARSET', 'utf8mb4');
+define('DB_CHARSET', 'utf8');
 
 /** The Database Collate type. Don't change this if in doubt. */
 define('DB_COLLATE', '');
