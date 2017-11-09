@@ -41,7 +41,7 @@
     <label class='label advads-hide-in-wizard' for="advads-output-wrapper-class"><?php _e( 'container classes', 'advanced-ads' ); ?></label>
     <div class="advads-hide-in-wizard">
 	<input type="text" id="advads-output-wrapper-class" name="advanced_ad[output][wrapper-class]" value="<?php if ( isset($options['wrapper-class']) ) { echo $options['wrapper-class']; } ?>"/>
-	<p class="description"><?php _e( 'Specify one or more classes for the container. Separate multiple classes with a space', 'advanced-ads.' ); ?></p>
+	<p class="description"><?php _e( 'Specify one or more classes for the container. Separate multiple classes with a space', 'advanced-ads' ); ?></p>
     </div>
     <hr class="advads-hide-in-wizard"/>
     <label for="advads-output-debugmode" class="label advads-hide-in-wizard"><?php _e( 'Enable debug mode', 'advanced-ads' ); ?></label>

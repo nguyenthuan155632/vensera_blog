@@ -194,6 +194,21 @@ advads = {
 			el.prependTo(target);
 		}
 	},
+
+	/**
+	 * Set 'relative' position for a parent element.
+	 *
+	 * @param {str} element selector
+	 */
+	set_parent_relative: function( element ) {
+		var el = jQuery(element);
+		// give "position" style to parent element, if missing
+		var parent = el.parent();
+		if(parent.css('position') === 'static' || parent.css('position') === ''){
+			parent.css('position', 'relative');
+		}
+	},
+
 	/**
 	 * make an absolute position element fixed at the current position
 	 * hint: use only after DOM is fully loaded in order to fix a wrong position
@@ -202,12 +217,9 @@ advads = {
 	 * @param {obj} options
 	 */
 	fix_element: function( element, options ){
+		this.set_parent_relative( element );
+
 		var el = jQuery(element);
-		// give "position" style to parent element, if missing
-		var parent = el.parent();
-		if(parent.css('position') === 'static' || parent.css('position') === ''){
-			parent.css('position', 'relative');
-		}
 
 		// fix element at current position
 		// get position for hidden elements by showing them for a very short time
@@ -219,7 +231,8 @@ advads = {
 		if( typeof options !== 'undefined' && options.is_invisible ){
 		    el.hide();
 		}
-		el.css('position', 'fixed').css('top', topoffset + 'px').css('left', leftoffset + 'px');
+		// reset "right" to prevent conflicts
+		el.css('position', 'fixed').css('top', topoffset + 'px').css('left', leftoffset + 'px').css('right', '');
 	},
 	/**
 	 * find the main wrapper

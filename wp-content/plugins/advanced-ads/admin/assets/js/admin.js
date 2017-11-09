@@ -70,7 +70,7 @@ jQuery( document ).ready(function ($) {
 		success: function (r, textStatus, XMLHttpRequest) {
 		    $( '#advads-ad-injection-box *' ).hide();
 		    // append anchor to placement message
-		    $( '#advads-ad-injection-message-placement-created a' ).attr( 'href', $( '#advads-ad-injection-message-placement-created a' ).attr( 'href' ) + r );
+		    $( '#advads-ad-injection-message-placement-created .advads-placement-link' ).attr( 'href', $( '#advads-ad-injection-message-placement-created a' ).attr( 'href' ) + r );
 		    $( '#advads-ad-injection-message-placement-created, #advads-ad-injection-message-placement-created *' ).show();
 		},
 		error: function (MLHttpRequest, textStatus, errorThrown) {
@@ -144,7 +144,7 @@ jQuery( document ).ready(function ($) {
 				    var searchParam  = request.term;
 				    advads_post_search( searchParam, callback );
 			    },
-			    minLength: 2,
+			    minLength: 1,
 			    select: function( event, ui ) {
 				    // append new line with input fields
 				    var newline = $( '<label class="button ui-state-active">' + ui.item.label + '</label>' );
@@ -203,14 +203,26 @@ jQuery( document ).ready(function ($) {
 	    $(this).parents('.advads-conditions-table tr').remove();
 	});
 	
+	// display new ad group form
+	$( '#advads-new-ad-group-link' ).click(function(e){
+		e.preventDefault();
+		$( '#advads-new-group-form' ).show().find('input[type="text"]').focus();
+	});
+	
 	// display ad groups form
 	$( '#advads-ad-group-list a.edit, #advads-ad-group-list a.row-title' ).click(function(e){
 		e.preventDefault();
 		var advadsgroupformrow = $( this ).parents( '.advads-group-row' ).next( '.advads-ad-group-form' );
 		if(advadsgroupformrow.is( ':visible' )){
 			advadsgroupformrow.hide();
+			// clear last edited id
+			$('#advads-last-edited-group').val('');
 		} else {
 			advadsgroupformrow.show();
+			// attach current group id to url to open it later again
+			var group_id = $( this ).parents( '.advads-group-row' ).find('.advads-group-id').val();
+			$('#advads-last-edited-group').val( group_id );
+			
 		}
 	});
 	// display ad groups usage
@@ -223,16 +235,24 @@ jQuery( document ).ready(function ($) {
 			usagediv.show();
 		}
 	});
-	// display ad groups usage
+	// display manual placement usage
 	$( '.advads-placements-table .usage-link' ).click(function(e){
 		e.preventDefault();
-		var usagediv = $( this ).next( '.advads-usage' );
+		var usagediv = $( this ).parents( 'tr' ).find( '.advads-usage' );
 		if(usagediv.is( ':visible' )){
 			usagediv.hide();
 		} else {
 			usagediv.show();
 		}
 	});
+	/** 
+	 * automatically open all options and show usage link when this is the placement linked in the URL
+	 * also highlight the box with an effect for a short time
+	 */
+	if( jQuery( window.location.hash ).length ){
+		jQuery( window.location.hash ).toggleClass( 'advads-placement-background-blink' ).find( '.advads-toggle-link + div, .advads-usage' ).show();
+		
+	}
 
 	// group page: add ad to group
 	$( '.advads-group-add-ad button' ).click( function() {
@@ -263,8 +283,35 @@ jQuery( document ).ready(function ($) {
 		}
 		$ad_row.remove();
 	});
+	// group page: handle switching of group types based on a class derrived from that type
+	$('.advads-ad-group-type input').click(function(){
+		advads_show_group_options( $( this ) );
+	});
+	function advads_show_group_options( el ){
+		// first, hide all options except title and type
+		// iterate through all elements
+		el.each( function(){
+			var _this = jQuery( this );
+			_this.parents('.advads-ad-group-form').find('.advads-option:not(.static)').hide();
+			var current_type = _this.val();
 
-
+			// now, show only the ones corresponding with the group type
+			_this.parents('.advads-ad-group-form').find( '.advads-group-type-' + current_type  ).show();
+		});
+	}
+	// set default group options for earch group
+	
+	advads_show_group_options( $( '.advads-ad-group-type input:checked' ) );
+	// group page: hide ads if more than 4 – than only show 3
+	$('.advads-ad-group-list-ads').each( function(){
+		if( 5 <= $(this).find('li').length ){
+		    $(this).find('li:gt(2)').hide();
+		};
+	});
+	// show more than 3 ads when clicked on a link
+	$('.advads-group-ads-list-show-more').click( function(){
+		jQuery( this ).hide().parents('.advads-ad-group-list-ads').find('li').show();
+	});
 
 	/**
 	 * SETTINGS PAGE
@@ -285,7 +332,7 @@ jQuery( document ).ready(function ($) {
 		addon: this.dataset.addon,
 		pluginname: this.dataset.pluginname,
 		optionslug: this.dataset.optionslug,
-		license: $(this).siblings('.advads-license-key').val(),
+		license: $(this).parents('td').find('.advads-license-key').val(),
 		security: $('#advads-licenses-ajax-referrer').val()
 	    };
 
@@ -296,19 +343,20 @@ jQuery( document ).ready(function ($) {
 	    $.post(ajaxurl, query, function (r) {
 		// remove spinner
 		$('span.spinner').remove();
+		var parent = button.parents('td');
 
 		if( r === '1' ){
-		    button.siblings('.advads-license-activate-error').remove();
-		    button.siblings('.advads-license-deactivate').show();
+		    parent.find('.advads-license-activate-error').remove();
+		    parent.find('.advads-license-deactivate').show();
 		    button.fadeOut();
-		    button.siblings('.advads-license-activate-active').fadeIn();
-		    button.siblings('input').prop('readonly', 'readonly');
+		    parent.find('.advads-license-activate-active').fadeIn();
+		    parent.find('input').prop('readonly', 'readonly');
 		} else if( r === 'ex' ){
-		    button.siblings('.advads-license-activate-error').remove();
-		    button.siblings('.advads-license-expired-error').show();
+		    parent.find('.advads-license-activate-error').remove();
+		    parent.find('.advads-license-expired-error').show();
 		    button.show();
 		} else {
-		    button.siblings('.advads-license-activate-error').show().text( r );
+		    parent.find('.advads-license-activate-error').show().text( r );
 		    button.show();
 		}
 	    });
@@ -366,7 +414,6 @@ jQuery( document ).ready(function ($) {
 	/**
 	* PLACEMENTS
 	*/
-
 	 // show image tooltips
 	if ( $.fn.tooltip ) {
 		$( ".advads-placements-new-form .advads-placement-type" ).tooltip({
@@ -380,7 +427,6 @@ jQuery( document ).ready(function ($) {
 	/**
          * Image ad uploader
          */
-
 	$('body').on('click', '.advads_image_upload', function(e) {
 
 		e.preventDefault();
@@ -522,7 +568,6 @@ jQuery( document ).ready(function ($) {
 			jQuery( '#advads_xml_content' ).hide();
 		}
 	});
-
 });
 
 /**
@@ -807,8 +852,6 @@ var advads_use_ui_buttonset = ( function() {
 	};
 })();
 
-
-
 window.advanced_ads_admin = window.advanced_ads_admin || {};
 advanced_ads_admin.filesystem = {
 	/**
@@ -830,7 +873,7 @@ advanced_ads_admin.filesystem = {
 		this._init = function() {}
 		var self = this;
 
-		self.$filesystemModal = jQuery( '#request-filesystem-credentials-dialog' );
+		self.$filesystemModal = jQuery( '#advanced-ads-rfc-dialog' );
 		/**
 		 * Sends saved job.
 		 */

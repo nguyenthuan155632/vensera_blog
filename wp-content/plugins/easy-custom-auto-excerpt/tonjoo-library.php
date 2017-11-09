@@ -15,11 +15,20 @@ function tj_print_select_option($options){
 	
 	$options['id'] = isset($options['id']) ? $options['id'] : '';
 	$options['description'] = isset($options['description']) ? $options['description'] : '';
+	$options['premium'] = isset($options['premium']) ? $options['premium'] : false;
+
+	// premium feature
+	if(! function_exists('is_ecae_premium_exist') && $options['premium']) {
+		$disabled_opt = 'disabled';
+	}
+	else {
+		$disabled_opt = '';
+	}	
 
 	$print_select= "<tr valign='top' id='{$options['id']}'>
 						<th scope='row'>{$options['label']}</th>
 						<td>
-							<select name='{$options['name']}'>
+							<select $disabled_opt name='{$options['name']}'>
 							{$r}
 							</select>							
 						</td>

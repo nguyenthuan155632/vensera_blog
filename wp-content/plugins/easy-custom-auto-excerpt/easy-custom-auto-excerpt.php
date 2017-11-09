@@ -3,7 +3,7 @@
 Plugin Name: Easy Custom Auto Excerpt
 Plugin URI: https://www.tonjoostudio.com/addons/easy-custom-auto-excerpt/
 Description: Auto Excerpt for your post on home, front_page, search and archive.
-Version: 2.4.1
+Version: 2.4.5
 Author: tonjoo
 Author URI: https://www.tonjoostudio.com/
 Contributor: Todi Adiyatmo Wijoyo, Haris Ainur Rozak
@@ -12,7 +12,7 @@ Contributor: Todi Adiyatmo Wijoyo, Haris Ainur Rozak
 $plugin = plugin_basename(__FILE__);
 
 define("TONJOO_ECAE", 'easy-custom-auto-excerpt');
-define("ECAE_VERSION", '2.4');
+define("ECAE_VERSION", '2.4.5');
 define("ECAE_DIR_NAME", str_replace("/easy-custom-auto-excerpt.php", "", plugin_basename(__FILE__)));
 define("ECAE_HTTP_PROTO", is_ssl() ? "https://" : "http://");
 
@@ -50,17 +50,17 @@ function tonjoo_ecae_remove_all_filters() {
     add_filter('the_excerpt', 'tonjoo_ecae_get_the_excerpt',999);
 }
 
-// Remove default <-- more --> link
-add_filter( 'the_content_more_link', 'modify_read_more_link' );
-function modify_read_more_link() {
-    return '';
-}
-
 // Direcly call the excerpt
 function tonjoo_ecae_get_the_excerpt($output) {
     global $post;
 
     return apply_filters( 'the_content', $post->post_content );
+}
+
+// Remove default <-- more --> link
+add_filter( 'the_content_more_link', 'modify_read_more_link' );
+function modify_read_more_link() {
+    return '';
 }
 
 // Donation
@@ -206,7 +206,7 @@ function ecae_wp_enqueue_scripts() {
                 // do nothing
         }
 
-        $inline_css.= "p.ecae-button { font-family: '".$options['button_font']."', Helvetica, Arial, sans-serif; }";
+        $inline_css.= "span.ecae-button { font-family: '".$options['button_font']."', Helvetica, Arial, sans-serif; }";
     }
 
     /**
@@ -224,12 +224,7 @@ function ecae_wp_enqueue_scripts() {
 
     // if($is_readmore && $options['readmore_inline'] == 'yes')
     if($options['readmore_inline'] == 'yes') {
-        $inline_css.= ".ecae p:nth-last-of-type(2) {
-            display: inline !important;
-            padding-right: 10px;
-        }
-
-        .ecae-button {
+        $inline_css.= ".ecae-button {
             display: inline-block !important;
         }";
     }
@@ -439,12 +434,12 @@ function tonjoo_ecae_execute($content, $width = 400) {
      * no limit number if 1st-paragraph mode
      */
     if(strpos($options['excerpt_method'],'-paragraph')) {
-        if(function_exists("is_ecae_premium_exist")) {
+        // if(function_exists("is_ecae_premium_exist")) {
             $width = strlen(wp_kses($content,array())); //max integer in 32-bit system
-        }
-        else {
-            $options['excerpt_method'] = 'paragraph';
-        }
+        // }
+        // else {
+        //     $options['excerpt_method'] = 'paragraph';
+        // }
     }
 
     if($options['location_settings_type'] == 'basic') {
@@ -532,7 +527,7 @@ function tonjoo_ecae_execute($content, $width = 400) {
                 $page_post_type = $options['page_post_type'];
                 $page_category = $options['page_category'];
 
-                if(count($advanced_page) > 0) {
+                if(is_array($advanced_page) && count($advanced_page) > 0) {
                     foreach ($advanced_page as $key => $value) {
                         if($value != '' && is_page($value)) {
                             $return['data'] = $content;
@@ -691,7 +686,7 @@ function tonjoo_ecae_excerpt($content, $width, $justify) {
             $extra_markup = array();
         }
 
-        $extra_markup_tag=array('*=','(=',')=','_=','<=','>=','/=','\=',']=','[=','{=','}=','|=');
+        $extra_markup_tag = array('*=','(=',')=','_=','<=','>=','/=','\=',']=','[=','{=','}=','|=');
 
         //default order
         $array_replace_list['pre']='=@'; // syntax highlighter like crayon
@@ -888,11 +883,16 @@ function tonjoo_ecae_excerpt($content, $width, $justify) {
         }
     }
 
-
     /**
      * readmore text
      */
-    $link = get_permalink();
+    if(isset($post) && isset($post->ID)) {
+        $link = get_permalink($post->ID);
+    }
+    else {
+        $link = get_permalink();
+    }
+
     $readmore = "";
     $is_readmore = false;
 
@@ -901,6 +901,7 @@ function tonjoo_ecae_excerpt($content, $width, $justify) {
         if(strpos($content, 'ecae-table-cell')) $content = substr($content, 0, -6);
     }
 
+    // readmore
     if (trim($options['read_more']) != '-') {
         //failsafe
         $options['read_more_text_before'] = isset($options['read_more_text_before'] )? $options['read_more_text_before']  : '...';
@@ -921,7 +922,7 @@ function tonjoo_ecae_excerpt($content, $width, $justify) {
         }
 
         $readmore_link = " <a class='ecae-link' href='$link'><span>$local_button_text</span></a>";
-        $readmore = "<p class='ecae-button {$button_skin[0]}' style='text-align:{$options['read_more_align']};' >$local_before_button_text $readmore_link</p>";
+        $readmore = "<span class='ecae-button {$button_skin[0]}' style='text-align:{$options['read_more_align']};' >$local_before_button_text $readmore_link</span>";
 
         // button_display_option
         if(! strpos($options['excerpt_method'],'-paragraph')) {
@@ -942,12 +943,20 @@ function tonjoo_ecae_excerpt($content, $width, $justify) {
         }
     }
 
+    // show dots
+    if($options['show_dots'] == 'yes') {
+        $content = str_replace('<!-- DOTS -->', "<span class='ecae-dots'>[...]</span>", $content);
+    }
+    else {
+        $content = str_replace('<!-- DOTS -->', '', $content);
+    }
+
     /**
      * filter if 1st-paragraph mode
      */
     if(strpos($options['excerpt_method'],'-paragraph')) {
         $num_paragraph = substr($options['excerpt_method'], 0, 1);
-        $content = get_per_paragraph(intval($num_paragraph), $content);
+        $content = ecae_get_per_paragraph(intval($num_paragraph), $content, $options);
 
         global $content_pure;
 
@@ -956,16 +965,19 @@ function tonjoo_ecae_excerpt($content, $width, $justify) {
 
         // button_display_option
         if($options['button_display_option'] == 'always_show') {
-            $content = $content . $readmore;
+            $content = str_replace('<!-- READ MORE TEXT -->', $readmore, $content);
             $is_readmore = true;
         }
         else if($options['button_display_option'] == 'always_hide') {
-            $content = $content;
+            $content = str_replace('<!-- READ MORE TEXT -->', '', $content);
         }
         else {
             if($len_content < $len_content_pure) {
-                $content = $content . $readmore;
+                $content = str_replace('<!-- READ MORE TEXT -->', $readmore, $content);
                 $is_readmore = true;
+            }
+            else {
+                $content = str_replace('<!-- READ MORE TEXT -->', '', $content);
             }
         }
     }
@@ -990,3 +1002,37 @@ function tonjoo_ecae_excerpt($content, $width, $justify) {
 function ecae_enable_thumbnail($is_enable) {
     return true;
 }
+
+/**
+ * Show 1st - 3rd paragraph
+ */
+if(! function_exists('ecae_get_per_paragraph')):
+function ecae_get_per_paragraph($num, $content, $options) {
+    $arr_content = explode("</p>",$content);
+    $ret_content = "";
+    $elapsed_num = 0;
+
+    for ($i=0; $i < count($arr_content); $i++) {
+        if(trim($arr_content[$i]) == '') break;
+
+        $elapsed_num++;
+
+        $ret_content .= $arr_content[$i];
+
+        if($elapsed_num >= $num) {
+            // show dots
+            if($options['show_dots'] == 'yes') {
+                $ret_content .= "<span class='ecae-dots'>[...]</span>";
+            }
+
+            $ret_content .= "<!-- READ MORE TEXT --></p>";
+
+            break;
+        }
+            
+        $ret_content .= "</p>";
+    }
+
+    return $ret_content;
+}
+endif;

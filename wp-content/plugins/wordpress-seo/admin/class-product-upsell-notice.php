@@ -141,14 +141,14 @@ class WPSEO_Product_Upsell_Notice {
 		$message .= sprintf(
 			/* translators: %1$s is a link start tag to the bugreport guidelines on the Yoast knowledge base, %2$s is the link closing tag. */
 			__( 'If you are experiencing issues, %1$splease file a bug report%2$s and we\'ll do our best to help you out.', 'wordpress-seo' ),
-			'<a href="'. WPSEO_Shortlinker::get( 'https://yoa.st/bugreport' ) . '">',
+			'<a href="' . WPSEO_Shortlinker::get( 'https://yoa.st/bugreport' ) . '">',
 			'</a>'
 		) . "\n\n";
 
 		$message .= $this->get_premium_upsell_section() . "\n\n";
 
 		$message .= sprintf(
-		 	/* translators: %1$s is the notification dismissal link start tag, %2$s is the link closing tag. */
+			/* translators: %1$s is the notification dismissal link start tag, %2$s is the link closing tag. */
 			__( '%1$sPlease don\'t show me this notification anymore%2$s', 'wordpress-seo' ),
 			'<a class="button" href="' . admin_url( '?page=' . WPSEO_Admin::PAGE_IDENTIFIER . '&yoast_dismiss=upsell' ) . '">',
 			'</a>'
@@ -159,7 +159,7 @@ class WPSEO_Product_Upsell_Notice {
 			array(
 				'type'         => Yoast_Notification::WARNING,
 				'id'           => 'wpseo-upsell-notice',
-				'capabilities' => 'manage_options',
+				'capabilities' => 'wpseo_manage_options',
 				'priority'     => 0.8,
 			)
 		);

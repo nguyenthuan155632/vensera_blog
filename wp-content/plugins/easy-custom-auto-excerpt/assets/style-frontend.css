@@ -35,6 +35,15 @@
 	white-space:nowrap;
 }
 
+.ecae-button {
+	display: block;
+}
+
+.ecae-dots {
+	display: inline-block;
+    padding: 0 5px;
+}
+
 /* Responsive media screen */
 @media screen and (max-width : 768px) {
 	/* Styles */

@@ -30,16 +30,23 @@ class Advanced_Ads_Shortcode_Creator {
 	}
 
 	public function init() {
-		if( ! current_user_can( Advanced_Ads_Plugin::user_cap( 'advanced_ads_place_ads') ) || defined( 'ADVANCED_ADS_DISABLE_SHORTCODE_BUTTON' ) ) {
+		$options = Advanced_Ads::get_instance()->options();
+
+		if ( 'true' != get_user_option( 'rich_editing' )
+			|| ! current_user_can( Advanced_Ads_Plugin::user_cap( 'advanced_ads_place_ads' ) )
+			|| defined( 'ADVANCED_ADS_DISABLE_SHORTCODE_BUTTON' )
+			|| ! empty( $options['disable-shortcode-button'] )
+		) {
 			return;
 		}
 
-		if ( 'true' == get_user_option( 'rich_editing' ) ) {
-			add_filter( 'mce_external_plugins', array( $this, 'add_plugin' ) );
-			add_filter( 'mce_buttons', array( $this, 'register_buttons' ) );
-			add_filter( 'mce_external_languages', array( $this, 'add_l10n' ) );
-			add_action( 'wp_ajax_advads_content_for_shortcode_creator', array( $this, 'get_content_for_shortcode_creator' ) );
-		}
+		add_filter( 'mce_external_plugins', array( $this, 'add_plugin' ) );
+		add_filter( 'mce_buttons', array( $this, 'register_buttons' ) );
+		add_filter( 'mce_external_languages', array( $this, 'add_l10n' ) );
+		add_action( 'wp_ajax_advads_content_for_shortcode_creator', array( $this, 'get_content_for_shortcode_creator' ) );
+
+		add_filter( 'the_editor', array( $this, 'add_addblocker_warning' ) );
+		add_action( 'admin_footer', array( $this, 'maybe_show_adblocker_warning' ) );
 	}
 
 	/**
@@ -108,7 +115,7 @@ class Advanced_Ads_Shortcode_Creator {
 		$model = Advanced_Ads::get_instance()->get_model();
 
 		// load all ads
-		$ads = $model->get_ads( array( 'orderby' => 'name', 'order' => 'ASC' ) );
+		$ads = $model->get_ads( array( 'orderby' => 'title', 'order' => 'ASC' ) );
 		foreach ( $ads as $_ad ){
 			$select['ads']['ad_' . $_ad->ID] = $_ad->post_title;
 		}
@@ -121,6 +128,7 @@ class Advanced_Ads_Shortcode_Creator {
 
 		// load all placements
 		$placements = $model->get_ad_placements_array();
+		ksort( $placements );
 		foreach ( $placements as $key => $_placement ) {
 			$select['placements']['placement_' . $key] = $_placement['name'];
 		}
@@ -135,4 +143,39 @@ class Advanced_Ads_Shortcode_Creator {
 		$mce_external_languages[ 'advads_shortcode' ] = ADVADS_BASE_PATH . 'admin/includes/shortcode-creator-l10n.php';
 		return $mce_external_languages;
 	}
+
+	/**
+	 * Add a warning above TinyMCE editor.
+	 *
+	 * @param string $output Editor's HTML markup.
+	 */
+	public function add_addblocker_warning( $output ) {
+		ob_start(); ?>
+		<div style="display: none; margin: 10px 8px; color: red;" class="advanced-ads-shortcode-button-warning"><?php 
+		printf( __ ( 'Please, either switch off your ad blocker or disable the shortcode button in the <a href="%s" target="_blank">settings</a>.', 'advanced-ads' ), 
+			admin_url( 'admin.php?page=advanced-ads-settings' ) ); ?>
+		</div>
+		<?php
+		return ob_get_clean() . $output;
+	}
+
+	/**
+	 * Show a warning above TinyMCE editor when an adblock is enabled.
+	 */
+	public function maybe_show_adblocker_warning() { ?>
+		<script>
+		(function(){
+			if ( 'undefined' === typeof advanced_ads_adblocker_test ) {
+				try {
+				    var messages = document.querySelectorAll( '.advanced-ads-shortcode-button-warning' )
+				} catch ( e ) { return; }
+				for ( var i = 0; i < messages.length; i++ ) {
+				    messages[ i ].style.display = 'block';
+				}
+			}
+		})();
+		</script>
+		<?php
+	}
+
 }

@@ -9,10 +9,6 @@ if ( defined ( 'WP_DEBUG' ) && WP_DEBUG &&
 		<?php endif;
 		?>
 	</p>
-<?php endif; 
-
-if ( $message = Advanced_Ads_Ad_Debug::is_https_and_http( $ad ) ) : ?>
-	<p class="advads-error-message"><?php echo $message; ?></p>
 <?php endif;
 
 do_action( 'advanced-ads-ad-params-below-textarea', $ad );

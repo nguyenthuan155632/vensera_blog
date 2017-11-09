@@ -406,87 +406,14 @@ global $if_utils;
 //unset($_SESSION['license_validate_daily']);
 /*unset($_COOKIE['license_validate_daily_yz']);
 setcookie('license_validate_daily', null, -1, '/');*/
-
-if( (!isset($_COOKIE['license_validate_daily_yz']) || $_COOKIE['license_validate_daily_yz'] != 1) && $this->parameter['method'] == 'buy' ){
-	$temp_options = $if_utils->IF_get_option( $this->parameter['name_option'] );
-	
-	if(!$temp_options){
-		
-		echo "<script>window.location.href='".admin_url( 'admin.php?page=yuzo-welcome' )."';</script>";
-	}elseif(!isset($temp_options->active_license) || !$temp_options->active_license){
-		
-		echo "<script>window.location.href='".admin_url( "admin.php?page=yuzo-welcome" )."';</script>";
-	}else{
-		
-		echo '
-			<script>
-				jQuery.ajax({
-			        dataType: "json",
-			        type: "POST",
-			        url: "https://yuzopro.com/active.php?veri='.$temp_options->active_license.'&callback=?",
-			        success: function (html) {
-			            for ( var i in html ) {
-			                if( html.validate == 0 ){
-			                	console.log(html.message);
-			                	//console.log("error");
-			                    window.location.href="'.admin_url( 'admin.php?page=yuzo-welcome' ).'";
-			                }else if( html.validate == 1 ){
-			                	function createCookie(name,value,days) {
-								    if (days) {
-								        var date = new Date();
-								        date.setTime(date.getTime()+(days*24*60*60*1000));
-								        var expires = "; expires="+date.toGMTString();
-								    }
-								    else var expires = "";
-								    document.cookie = name+"="+value+expires+"; path=/";
-								}
-								createCookie("license_validate_daily_yz",1,30);
-			                    console.log("okok");
-			                }
-			            }
-			        },error: function (xhr, ajaxOptions, thrownError) {
-                        console.log(  xhr.responseText + " | " + thrownError);
-                      }
-			    });
-		    </script>
-		    ';
-	
-}
-}
+ 
 
 ?>
 
-<?php if( $this->parameter['method'] == 'buy' ): ?>
-				<script src="http://malsup.github.com/jquery.form.js"></script>
-					<div class="IF_loads_save" style="    
-	position: absolute;
-    width: 100%;
-    height: 100%;
-    background: white;
-    opacity: 0.7;
-    top: 0;
-    left: 0;
-    z-index: 99;display:none;">
-    	<img src="<?php echo $this->parameter['url_framework']; ?>/assets/images/preloader.gif" alt="" style="
-    	    margin: 0 auto;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    /* width: 50%; */
-    width: 256px;
-    margin-left: -128px;
-    margin-top: -128px;" />
-    </div>
-					<script>
-						jQuery(document).ready(function( $ ){
-							//$("body").append( $(".IF_loads_save").html() );
-						});
-					</script>
-				<?php endif; ?>
 		<div class='ilenplugin-options ilenplugin-<?php echo $this->parameter["name_option"] ?> <?php if( isset($_POST) && !$_POST && isset($this->parameter["animation_postbox"]) && $this->parameter["animation_postbox"] ){ echo $this->parameter["animation_postbox"]; } ?> <?php if( isset($this->parameter["method"]) && $this->parameter["method"] == 'buy' ){ echo "plugin-pro"; } ?>'>
 
 
-			<form action="<?php echo $_SERVER['REQUEST_URI'];?>" method="POST" name="frmsave" id="frmsave">
+			<form action="" method="POST" name="frmsave" id="frmsave">
  
 				<div id="poststuff" class="metabox-holder has-right-sidebar">
 

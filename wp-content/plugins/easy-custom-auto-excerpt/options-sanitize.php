@@ -103,6 +103,10 @@ function ecae_sanitize_options($opt) {
 	if(isset($opt['readmore_inline'])) {
 		$opt['readmore_inline'] = sanitize_text_field($opt['readmore_inline']);
 	}
+
+	if(isset($opt['show_dots'])) {
+		$opt['show_dots'] = sanitize_text_field($opt['show_dots']);
+	}
 	
 	if(isset($opt['read_more_align'])) {
 		$opt['read_more_align'] = sanitize_text_field($opt['read_more_align']);

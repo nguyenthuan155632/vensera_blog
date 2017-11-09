@@ -90,7 +90,27 @@ class Advanced_Ads_Display_Conditions {
 		'metabox' => array('Advanced_Ads_Display_Conditions', 'metabox_author'), // callback to generate the metabox
 		'check' => array('Advanced_Ads_Display_Conditions', 'check_author'), // callback for frontend check
 	    ),
+	    /**
+	     * display ads only in content older or younger than a specific age
+	     */
+	    'content_age' => array(
+		    'label' => __( 'content age', 'advanced-ads' ),
+		    'description' => __( 'Display ads based on age of the page.', 'advanced-ads' ),
+		    'metabox' => array( 'Advanced_Ads_Display_Conditions', 'metabox_content_age' ), // callback to generate the metabox
+		    'check' => array( 'Advanced_Ads_Display_Conditions', 'check_content_age' ) // callback for frontend check
+	    ),
+	    /**
+	     * condition for taxonomies in general
+	     */
+	    'taxonomy' => array(
+		    'label' => __( 'taxonomy', 'advanced-ads' ),
+		    'description' => __( 'Display ads based on the taxonomy of an archive page.', 'advanced-ads' ),
+		    'metabox' => array( 'Advanced_Ads_Display_Conditions', 'metabox_taxonomies' ), // callback to generate the metabox
+		    'check' => array( 'Advanced_Ads_Display_Conditions', 'check_taxonomy' ) // callback for frontend check
+	    ),
 	);
+	
+	
 
 	// register a condition for each taxonomy for posts
 	$taxonomies = get_taxonomies(array('public' => true, 'publicly_queryable' => true), 'objects', 'or');	
@@ -117,8 +137,6 @@ class Advanced_Ads_Display_Conditions {
 	endforeach;
 
 	$this->conditions = apply_filters('advanced-ads-display-conditions', $conditions);
-
-	ksort($this->conditions);
     }
 
     /**
@@ -133,6 +151,18 @@ class Advanced_Ads_Display_Conditions {
 
 	return self::$instance;
     }
+    
+
+    /**
+     * get the conditions array alphabetically by label
+     * 
+     * @since 1.8.12
+     */
+    public function get_conditions(){
+	    uasort( $this->conditions, 'Advanced_Ads_Admin::sort_condition_array_by_label' );
+
+	    return $this->conditions;
+    }    
 
     /**
      * controls frontend checks for conditions
@@ -274,47 +304,90 @@ class Advanced_Ads_Display_Conditions {
 	<?php if( count( $authors ) >= $max_authors ) : ?><p class="advads-error-message"><?php printf( __( 'Only %d elements are displayed above. Use the <code>advanced-ads-admin-max-terms</code> filter to change this limit according to <a href="%s" target="_blank">this page</a>.', 'advanced-ads' ), $max_authors, ADVADS_URL . 'codex/filter-hooks//#utm_source=advanced-ads&utm_medium=link&utm_campaign=author-term-limit' ); ?></p><?php endif; 
     }
 
-	       /**
-		* callback to display the metabox for the taxonomy archive pages
-		*
-		* @param arr $options options of the condition
-		* @param int $index index of the condition
-		*/
-	       static function metabox_taxonomy_terms($options, $index = 0) {
+	/**
+	 * callback to display the metabox for the taxonomy archive pages
+	 *
+	 * @param arr $options options of the condition
+	 * @param int $index index of the condition
+	 */
+	static function metabox_taxonomy_terms($options, $index = 0) {
 
-		   if (!isset($options['type']) || '' === $options['type']) {
-		       return;
-		   }
+		if (!isset($options['type']) || '' === $options['type']) {
+		    return;
+		}
 
-		   $type_options = self::get_instance()->conditions;
+		$type_options = self::get_instance()->conditions;
 
-		   // don’t use if this is not a taxonomy
-		   if (!isset($type_options[$options['type']]) || !isset($type_options[$options['type']]['taxonomy'])) {
-		       return;
-		   }
+		// don’t use if this is not a taxonomy
+		if (!isset($type_options[$options['type']]) || !isset($type_options[$options['type']]['taxonomy'])) {
+		    return;
+		}
 
-		   $taxonomy = get_taxonomy($type_options[$options['type']]['taxonomy']);
-		   if (false == $taxonomy) {
-		       return;
-		   }
+		$taxonomy = get_taxonomy($type_options[$options['type']]['taxonomy']);
+		if (false == $taxonomy) {
+		    return;
+		}
 
-		   // get values and select operator based on previous settings
-		   $operator = ( isset($options['operator']) && $options['operator'] === 'is_not' ) ? 'is_not' : 'is';
-		   $values = ( isset($options['value']) && is_array($options['value']) ) ? $options['value'] : array();
+		// get values and select operator based on previous settings
+		$operator = ( isset($options['operator']) && $options['operator'] === 'is_not' ) ? 'is_not' : 'is';
+		$values = ( isset($options['value']) && is_array($options['value']) ) ? $options['value'] : array();
 
-		   // limit the number of terms so many terms don’t break the admin page
-		   $max_terms = absint(apply_filters('advanced-ads-admin-max-terms', 50));
+		// limit the number of terms so many terms don’t break the admin page
+		$max_terms = absint(apply_filters('advanced-ads-admin-max-terms', 50));
 
-		   // form name basis
-		   $name = self::FORM_NAME . '[' . $index . ']';
-		   ?><input type="hidden" name="<?php echo $name; ?>[type]" value="<?php echo $options['type']; ?>"/>
-	<select name="<?php echo $name; ?>[operator]">
-	    <option value="is" <?php selected('is', $operator); ?>><?php _e('is', 'advanced-ads'); ?></option>
-	    <option value="is_not" <?php selected('is_not', $operator); ?>><?php _e('is not', 'advanced-ads'); ?></option>
-	</select><?php
-		   ?><div class="advads-conditions-single advads-buttonset"><?php
-	self::display_term_list($taxonomy, $values, $name . '[value][]', $max_terms, $index);
-	?></div><?php
+		// form name basis
+		$name = self::FORM_NAME . '[' . $index . ']';
+		?><input type="hidden" name="<?php echo $name; ?>[type]" value="<?php echo $options['type']; ?>"/>
+		<select name="<?php echo $name; ?>[operator]">
+		    <option value="is" <?php selected('is', $operator); ?>><?php _e('is', 'advanced-ads'); ?></option>
+		    <option value="is_not" <?php selected('is_not', $operator); ?>><?php _e('is not', 'advanced-ads'); ?></option>
+		</select><?php
+			   ?><div class="advads-conditions-single advads-buttonset"><?php
+		self::display_term_list($taxonomy, $values, $name . '[value][]', $max_terms, $index);
+		?></div><?php
+	}
+	
+	/**
+	 * callback to display the metabox for the taxonomies
+	 *
+	 * @param arr $options options of the condition
+	 * @param int $index index of the condition
+	 */
+	static function metabox_taxonomies($options, $index = 0) {
+
+		if (!isset($options['type']) || '' === $options['type']) {
+		    return;
+		}
+
+		$taxonomies = get_taxonomies( array( 'public' => 1 ), 'objects' );
+		
+		$name = self::FORM_NAME . '[' . $index . ']';
+		
+		// get values and select operator based on previous settings
+		$operator = ( isset($options['operator']) && $options['operator'] === 'is_not' ) ? 'is_not' : 'is';
+		$values = ( isset($options['value']) && is_array($options['value']) ) ? $options['value'] : array();
+
+		?><input type="hidden" name="<?php echo $name; ?>[type]" value="<?php echo $options['type']; ?>"/>
+		<div class="advads-conditions-single advads-buttonset"><?php
+		$tax_label_counts = array_count_values( wp_list_pluck( $taxonomies, 'label' ) );
+
+		foreach ($taxonomies as $_taxonomy_id => $_taxonomy) :
+		    		    
+		    if ( in_array($_taxonomy_id, $values)) {
+			$_val = 1;
+		    } else {
+			$_val = 0;
+		    }
+
+		    if ( $tax_label_counts[ $_taxonomy->label ] < 2 ) {
+			$_label = $_taxonomy->label;
+		    } else {
+			$_label = sprintf( '%s (%s)', $_taxonomy->label, $_taxonomy_id );
+		    }
+		    ?><label class="button" for="advads-conditions-<?php echo $index; ?>-<?php echo $_taxonomy_id;
+		    ?>"><?php echo $_label ?></label><input type="checkbox" id="advads-conditions-<?php echo $index; ?>-<?php echo $_taxonomy_id; ?>" name="<?php echo $name; ?>[value][]" <?php checked($_val, 1); ?> value="<?php echo $_taxonomy_id; ?>"><?php
+		endforeach;
+		?><p class="advads-conditions-not-selected advads-error-message"><?php _ex( 'Please select some items.', 'Error message shown when no display condition term is selected', 'advanced-ads' ); ?></p></div><?php
 	}
 
 	/**
@@ -446,7 +519,7 @@ class Advanced_Ads_Display_Conditions {
 	    endforeach;
 	    ?></div><?php
 	    return;
-	}
+	}	
 
 	/**
 	 * retrieve the array with general conditions
@@ -498,6 +571,33 @@ class Advanced_Ads_Display_Conditions {
 		)
 	    ) );
 	}
+	
+	/**
+	 * Callback to display the 'content age' condition
+	 *
+	 * @param arr $options options of the condition
+	 * @param int $index index of the condition
+	 */
+	static function metabox_content_age( $options, $index = 0 ){
+		if ( ! isset ( $options['type'] ) || '' === $options['type'] ) { return; }
+
+		$type_options = Advanced_Ads_Display_Conditions::get_instance()->conditions;
+
+		if ( ! isset( $type_options[ $options['type'] ] ) ) {
+			return;
+		}
+
+		// form name basis
+		$name = Advanced_Ads_Display_Conditions::FORM_NAME . '[' . $index . ']';
+
+		$operator = isset( $options['operator'] ) ? $options['operator'] : 'older_than';
+		$value = ( isset( $options['value'] ) && is_numeric( $options['value'] ) ) ? floatval( $options['value'] ) : 0;
+		?><input type="hidden" name="<?php echo $name; ?>[type]" value="<?php echo $options['type']; ?>"/>
+		<select name="<?php echo $name; ?>[operator]">
+		    <option value="older_than" <?php selected( 'older_than', $operator ); ?>><?php _e( 'older than', 'advanced-ads-pro'); ?></option>
+		    <option value="younger_than" <?php selected( 'younger_than', $operator ); ?>><?php _e( 'younger than', 'advanced-ads-pro' ); ?></option>
+		</select><input type="text" name="<?php echo $name; ?>[value]" value="<?php echo $value; ?>"/>&nbsp;<?php _e( 'days', 'advanced-ads-pro' );
+	}	
 
 	/**
 	 * check post type display condition in frontend
@@ -642,6 +742,38 @@ class Advanced_Ads_Display_Conditions {
 	    
 	    return true;
 	}
+	
+	/**
+	 * check if a specific archive belongs to a taxonomy in general (not a specific term)
+	 *
+	 * @param arr $options options of the condition
+	 * @return bool true if can be displayed
+	 */
+	static function check_taxonomy( $options = array(), Advanced_Ads_Ad $ad ) {
+
+	    if( !isset( $options['value']) ){
+		return false;
+	    }
+	    
+	    if (isset($options['operator']) && $options['operator'] === 'is_not') {
+		$operator = 'is_not';
+	    } else {
+		$operator = 'is';
+	    }
+
+	    $ad_options = $ad->options();
+	    $query = $ad_options['wp_the_query'];
+	    
+	    // return false if operator is "is", but important query vars are not given
+	    if( 'is' === $operator && ( empty( $query['taxonomy'] ) || empty($query['is_archive']) ) ){
+		return false;
+	    } elseif ( isset($query['taxonomy']) && isset($query['is_archive']) && $query['is_archive'] && !self::can_display_ids($query['taxonomy'], $options['value'], $operator)
+	    ) {
+		return false;
+	    }
+	    
+	    return true;
+	}
 
 	/**
 	 * check post ids display condition in frontend
@@ -745,6 +877,39 @@ class Advanced_Ads_Display_Conditions {
 
 	    return false;
 	}
+	
+	/**
+	 * Check 'content age' condition in frontend.
+	 *
+	 * @param arr $options options of the condition
+	 * @param obj $ad Advanced_Ads_Ad
+	 * @return bool true if can be displayed
+	 */
+	static function check_content_age( $options = array(), Advanced_Ads_Ad $ad ) {
+		global $post;
+		
+		$operator = ( isset($options['operator']) && $options['operator'] === 'younger_than' ) ? 'younger_than' : 'older_than';
+		$value = isset( $options['value'] ) ? $options['value'] : '';
+
+		if ( empty( $post->ID ) && empty( $value ) ) {
+			return true;
+		}
+		
+		// get post publish date in unix timestamp
+		$publish_time = get_the_time( 'U', $post->ID );
+
+		// get difference from now
+		$diff_from_now = time() - $publish_time;
+		
+		// check against entered age
+		$value_in_seconds = DAY_IN_SECONDS * $value;
+
+		if( $operator === 'younger_than' ){
+			return $diff_from_now < $value_in_seconds;
+		} else {
+			return $diff_from_now > $value_in_seconds;
+		}
+	}	
 
 	/**
 	 * helper function to check for in array values
@@ -871,13 +1036,14 @@ class Advanced_Ads_Display_Conditions {
 	 * @return array
 	 */
 	public function ad_select_args_callback($args) {
-	    global $post, $wp_the_query, $wp_query;
+	    global $post, $wp_the_query, $wp_query, $numpages;
 
 	    if (isset($post)) {
 		if (!isset($args['post'])) {
 		    $args['post'] = array();
 		}
 		if (!isset($args['post']['id'])) {
+
 		    // if currently on a single site, use the main query information just in case a custom query is broken
 		    if( isset( $wp_the_query->post->ID ) && $wp_the_query->is_single() ){
 			$args['post']['id'] = $wp_the_query->post->ID;
@@ -913,10 +1079,20 @@ class Advanced_Ads_Display_Conditions {
 		if (!isset($args['wp_the_query']['term_id']) && $query) {
 		    $args['wp_the_query']['term_id'] = isset($query->term_id) ? $query->term_id : '';
 		}
+		// taxonomy
+		if (!isset($args['wp_the_query']['taxonomy']) && $query) {
+		    $args['wp_the_query']['taxonomy'] = isset($query->taxonomy) ? $query->taxonomy : '';
+		}
 
 		// query type/ context
 		if (!isset($args['wp_the_query']['is_main_query'])) {
 		    $args['wp_the_query']['is_main_query'] = Advanced_Ads::get_instance()->is_main_query();
+		}
+
+		// `<!-- nextpage -->` tags
+		if ( ! isset( $args['wp_the_query']['page'] ) ) {
+		    $args['wp_the_query']['page'] = isset( $wp_the_query->query_vars['page'] ) ? $wp_the_query->query_vars['page'] : 1;
+		    $args['wp_the_query']['numpages'] = isset( $numpages ) ? $numpages : 1;
 		}
 
 		// query vars
@@ -939,6 +1115,7 @@ class Advanced_Ads_Display_Conditions {
 	public static function modify_post_search( $query ) {
 		$query['suppress_filters'] = false;
 		$query['orderby'] = 'post_title';
+		$query['post_status'] = array( 'publish', 'pending', 'draft', 'future' );
 		return $query;
 	}
 

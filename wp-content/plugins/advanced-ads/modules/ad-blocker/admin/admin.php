@@ -96,7 +96,7 @@ class Advanced_Ads_Ad_Blocker_Admin
 			__( 'Ad blocker fix', 'advanced-ads' ),
 			array( $this, 'render_settings_use_adblocker' ),
 			$hook,
-			'advanced_ads_setting_section'
+			'advanced_ads_adblocker_setting_section'
 		);
 	}
 

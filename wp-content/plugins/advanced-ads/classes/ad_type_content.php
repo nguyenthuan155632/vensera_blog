@@ -37,7 +37,10 @@ class Advanced_Ads_Ad_Type_Content extends Advanced_Ads_Ad_Type_Abstract{
 		$this->parameters = array(
 			'content' => ''
 		);
+
+		add_filter( 'advanced-ads-save-options', array( $this, 'save_ad_options' ), 10, 2);
 	}
+
 
 	/**
 	 * output for the ad parameters metabox
@@ -84,12 +87,12 @@ class Advanced_Ads_Ad_Type_Content extends Advanced_Ads_Ad_Type_Abstract{
 	 * @since 1.0.0
 	 */
 	public function sanitize_content($content = ''){
-
+		// use WordPress core content filter
+		$content = apply_filters( 'content_save_pre', $content );
+		
 		// remove slashes from content
 		$content = wp_unslash( $content );
-
-		// use WordPress core content filter
-		return $content = apply_filters( 'content_save_pre', $content );
+		return $content;
 	}
 
 	/**
@@ -125,13 +128,48 @@ class Advanced_Ads_Ad_Type_Content extends Advanced_Ads_Ad_Type_Abstract{
 		$output = convert_chars( $output );
 		$output = wpautop( $output );
 		$output = shortcode_unautop( $output );
-		$output = do_shortcode( $output );
+		$output = $this->do_shortcode( $output, $ad );
 		$output = prepend_attachment( $output );
 		// make included images responsive, since WordPress 4.4
 		if( ! defined( 'ADVADS_DISABLE_RESPONSIVE_IMAGES' ) && function_exists( 'wp_make_content_images_responsive' ) ){
 			$output = wp_make_content_images_responsive( $output );
 		}
 
+		return $output;
+	}
+
+	/**
+	 * Add ad options.
+	 *
+	 * @param array $options Ad options.
+	 * @param obj $ad Advanced_Ads_Ad.
+	 * @retutn array $options Ad options.
+	 */
+	public function save_ad_options( $options, $ad ) {
+		if ( $ad->type === $this->ID ) {
+			$pattern = get_shortcode_regex( array( 'the_ad', 'the_ad_group', 'the_ad_placement' ) );
+			$options['output']['has_shortcode'] = preg_match( '/' . $pattern . '/s', $ad->content );
+		}
+		return $options;
+	}
+
+	/**
+	 * Process shortcodes.
+	 *
+	 * @param str $output Ad content.
+	 * @return obj Advanced_Ads_Ad
+	 */
+	private function do_shortcode( $output, Advanced_Ads_Ad $ad ) {
+		$ad_options = $ad->options();
+
+		if ( ! isset( $ad_options['output']['has_shortcode'] ) || $ad_options['output']['has_shortcode'] ) {
+			// Store arguments so that shortcode hooks can access it.
+			$ad_args = $ad->args;
+			$ad_args['shortcode_ad_id'] = $ad->id;
+			$output = preg_replace( '/\[(the_ad_group|the_ad_placement|the_ad)/', '[$1 ad_args="' . urlencode( json_encode( $ad_args ) )  . '"', $output );
+		}
+
+		$output = do_shortcode( $output );
 		return $output;
 	}
 

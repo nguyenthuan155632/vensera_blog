@@ -87,3 +87,14 @@ function the_ad_placement($id = ''){
 function advads_can_display_ads(){
     return Advanced_Ads::get_instance()->can_display_ads();
 }
+
+/**
+ * Are we currently on an AMP URL?
+ * Will always return `false` if called before the `parse_query` hook.
+ *
+ * @return bool true if amp url, false otherwise
+ */
+function advads_is_amp() {
+	return ( function_exists( 'is_amp_endpoint' ) && is_amp_endpoint() )
+	|| ( function_exists( 'is_wp_amp' ) && is_wp_amp() );
+}

@@ -3,7 +3,6 @@
  * the view for the support page
  */
 ?><div class="wrap">
-    <?php screen_icon(); ?>
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
     <p><?php _e( 'Please fix the red highlighted issues on this page or try to understand their consequences before contacting support.', 'advanced-ads' ); ?></p>
 

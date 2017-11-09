@@ -125,7 +125,7 @@ Class ECAE_The_Post {
                 $page_post_type = $this->opt['page_post_type'];
                 $page_category = $this->opt['page_category'];
 
-                if(count($advanced_page) > 0) {
+                if(is_array($advanced_page) && count($advanced_page) > 0) {
                     foreach ($advanced_page as $key => $value) {
                         if($value == '' || !is_page($value)) continue; 
 

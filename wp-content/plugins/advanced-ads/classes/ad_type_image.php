@@ -31,8 +31,8 @@ class Advanced_Ads_Ad_Type_Image extends Advanced_Ads_Ad_Type_Abstract{
 	 * @since 1.6.10
 	 */
 	public function __construct() {
-		$this->title = __( 'Image Ad', ADVADS_SLUG );
-		$this->description = __( 'Ads in various image formats.', ADVADS_SLUG );
+		$this->title = __( 'Image Ad', 'advanced-ads' );
+		$this->description = __( 'Ads in various image formats.', 'advanced-ads' );
 		$this->parameters = array(
 			'image_url' => '',
 			'image_title' => '',
@@ -52,8 +52,8 @@ class Advanced_Ads_Ad_Type_Image extends Advanced_Ads_Ad_Type_Abstract{
 		$url =	    ( isset( $ad->url ) ) ? esc_url( $ad->url ) : '';
 
 		?><p><button href="#" class="advads_image_upload button button-secondary" type="button" data-uploader-title="<?php
-		    _e( 'Insert File', ADVADS_SLUG ); ?>" data-uploader-button-text="<?php _e( 'Insert', ADVADS_SLUG ); ?>" onclick="return false;"><?php _e( 'select image', ADVADS_SLUG ); ?></button>
-		    <a id="advads-image-edit-link" href="<?php if( $id ){ echo get_edit_post_link( $id ); } ?>"><?php _e('edit', ADVADS_SLUG ); ?></a>
+		    _e( 'Insert File', 'advanced-ads' ); ?>" data-uploader-button-text="<?php _e( 'Insert', 'advanced-ads' ); ?>" onclick="return false;"><?php _e( 'select image', 'advanced-ads' ); ?></button>
+		    <a id="advads-image-edit-link" href="<?php if( $id ){ echo get_edit_post_link( $id ); } ?>"><?php _e('edit', 'advanced-ads' ); ?></a>
 		</p>
 		<input type="hidden" name="advanced_ad[output][image_id]" value="<?php echo $id; ?>" id="advads-image-id"/>
 		<div id="advads-image-preview">
@@ -62,10 +62,11 @@ class Advanced_Ads_Ad_Type_Image extends Advanced_Ads_Ad_Type_Abstract{
 
 		<?php // don’t show if tracking plugin enabled
 		if( ! defined( 'AAT_VERSION' )) : ?>
-		<p><label for="advads-url"><?php _e( 'url', ADVADS_SLUG ); ?></label><br/>
-		<input type="url" name="advanced_ad[url]" id="advads-url" value="<?php echo $url; ?>"/></p>
-		<p><?php printf(__( 'Open this url in a new window and track impressions and clicks with the <a href="%s" target="_blank">Tracking add-on</a>', ADVADS_SLUG ), ADVADS_URL . 'add-ons/tracking/#utm_source=advanced-ads&utm_medium=link&utm_campaign=edit-image-tracking'); ?></p>
-		<?php endif;
+			<span class="label"><?php _e( 'URL', 'advanced-ads' ); ?></span>
+			<div>
+				<input type="url" name="advanced_ad[url]" id="advads-url" class="advads-ad-url" value="<?php echo $url; ?>" placeholder="<?php _e( 'Link to target site', 'advanced-ads' ); ?>" /></p>
+			</div><hr/><?php 
+		endif;
 	}
 
 	/**
@@ -81,21 +82,24 @@ class Advanced_Ads_Ad_Type_Image extends Advanced_Ads_Ad_Type_Abstract{
 			list( $src, $width, $height ) = $image;
 			$hwstring = image_hwstring($width, $height);
 			$attachment = get_post($attachment_id);
-			$alt = trim(strip_tags( get_post_meta($attachment_id, '_wp_attachment_image_alt', true) ));
-			$title = trim(strip_tags( $attachment->post_title )); // Finally, use the title
+			$alt = trim(esc_textarea( get_post_meta($attachment_id, '_wp_attachment_image_alt', true) ));
+			$title = trim(esc_textarea( $attachment->post_title )); // Finally, use the title
 			
 			global $wp_current_filter;
 			
-			$more_attributes = '';
+			$more_attributes = $srcset = $sizes = '';
 			// create srcset and sizes attributes if we are in the the_content filter and in WordPress 4.4
 			if( isset( $wp_current_filter ) 
 				&& in_array( 'the_content', $wp_current_filter ) 
 				&& ! defined( 'ADVADS_DISABLE_RESPONSIVE_IMAGES' )){
 				if( function_exists( 'wp_get_attachment_image_srcset' ) ){
-					$more_attributes .= ' srcset=\'' . wp_get_attachment_image_srcset( $attachment_id, 'full' ) . '\'';
+					$srcset = wp_get_attachment_image_srcset( $attachment_id, 'full' );
 				}
 				if( function_exists( 'wp_get_attachment_image_sizes' ) ){
-					$more_attributes .= ' sizes=\'' . wp_get_attachment_image_sizes( $attachment_id, 'full' ) . '\'';
+					$sizes = wp_get_attachment_image_sizes( $attachment_id, 'full' );
+				}
+				if ( $srcset && $sizes ) {
+					$more_attributes .= ' srcset=\'' . $srcset . '\' sizes=\'' . $sizes . '\'';
 				}
 			}
 			
@@ -126,12 +130,13 @@ class Advanced_Ads_Ad_Type_Image extends Advanced_Ads_Ad_Type_Abstract{
 			    $height = 100;
 			}
 			
-			$hwstring = image_hwstring($width, $height);
+			$hwstring = trim( image_hwstring($width, $height) );
 			$attachment = get_post($attachment_id);
 			$alt = trim(strip_tags( get_post_meta($attachment_id, '_wp_attachment_image_alt', true) ));
-			$title = trim(strip_tags( $attachment->post_title )); // Finally, use the title
 			
-			echo rtrim("<img $hwstring") . " src='$src' alt='$alt' title='$title'/>";
+			$title = ( $attachment instanceof WP_Post ) ? trim(strip_tags( $attachment->post_title )) : ''; // Finally, use the title
+			
+			echo "<img $hwstring src='$src' alt='$alt' title='$title'/>";
 		}
 	}
 
@@ -146,9 +151,12 @@ class Advanced_Ads_Ad_Type_Image extends Advanced_Ads_Ad_Type_Abstract{
 
 		$id = ( isset( $ad->output['image_id'] ) ) ? absint( $ad->output['image_id'] ) : '';
 		$url =	    ( isset( $ad->url ) ) ? esc_url( $ad->url ) : '';
+		// get general target setting
+		$options = Advanced_Ads::get_instance()->options();
+		$target_blank =	!empty( $options['target-blank'] ) ? ' target="_blank"' : '';
 
 		ob_start();
-		if( ! defined( 'AAT_VERSION' ) && $url ){ echo '<a href="'. $url .'">'; }
+		if( ! defined( 'AAT_VERSION' ) && $url ){ echo '<a href="'. $url .'"'.$target_blank.'>'; }
 		echo $this->create_image_tag( $id );
 		if( ! defined( 'AAT_VERSION' ) && $url ){ echo '</a>'; }
 

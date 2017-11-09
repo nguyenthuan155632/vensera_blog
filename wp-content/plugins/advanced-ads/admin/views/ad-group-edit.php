@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! is_int( $group_id ) ) {
 	?>
-    <div id="message" class="updated"><p><strong><?php _e( 'You did not select an item for editing.' ); ?></strong></p></div>
+    <div id="message" class="updated"><p><strong><?php _e( 'You did not select an item for editing.', 'advanced-ads' ); ?></strong></p></div>
     <?php
 	return;
 }
@@ -30,19 +30,19 @@ do_action( "{$taxonomy}_pre_edit_form", $tag, $taxonomy );
 wp_nonce_field( 'update-group_' . $group_id ); ?>
         <table class="form-table">
             <tr class="form-field form-required">
-                <th scope="row" valign="top"><label for="name"><?php _ex( 'Name', 'Taxonomy Name' ); ?></label></th>
+                <th scope="row" valign="top"><label for="name"><?php _ex( 'Name', 'Taxonomy Name', 'advanced-ads' ); ?></label></th>
                 <td><input name="name" id="name" type="text" value="<?php if ( isset($tag->name) ) { echo esc_attr( $tag->name ); } ?>" size="40" aria-required="true" /></td>
             </tr>
 <?php if ( ! global_terms_enabled() ) { ?>
                 <tr class="form-field">
-                    <th scope="row" valign="top"><label for="slug"><?php _ex( 'Slug', 'Taxonomy Slug' ); ?></label></th>
+                    <th scope="row" valign="top"><label for="slug"><?php _ex( 'Slug', 'Taxonomy Slug', 'advanced-ads' ); ?></label></th>
                     <td><input name="slug" id="slug" type="text" value="<?php if ( isset($tag->slug) ) { echo esc_attr( apply_filters( 'editable_slug', $tag->slug ) ); } ?>" size="40" />
                         <p class="description"><?php _e( 'An id-like string with only letters in lower case, numbers, and hyphens.', 'advanced-ads' ); ?></p></td>
                 </tr>
 <?php }
 	$text = (isset($tag->description)) ? $tag->description : ''; ?>
             <tr class="form-field">
-                <th scope="row" valign="top"><label for="description"><?php _ex( 'Description', 'Taxonomy Description' ); ?></label></th>
+                <th scope="row" valign="top"><label for="description"><?php _ex( 'Description', 'Taxonomy Description', 'advanced-ads' ); ?></label></th>
                 <td><textarea name="description" id="description" rows="5" cols="50" class="large-text"><?php echo $text; // textarea_escaped ?></textarea></td>
             </tr>
             <?php

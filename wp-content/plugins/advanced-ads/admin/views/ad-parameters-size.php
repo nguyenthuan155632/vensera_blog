@@ -1,7 +1,7 @@
 <span class="label"><?php _e( 'size', 'advanced-ads' ); ?></span>
 <div id="advanced-ads-ad-parameters-size">
-    <label><?php _e( 'width', 'advanced-ads' ); ?><input type="number" size="4" maxlength="4" value="<?php echo isset($ad->width) ? $ad->width : 0; ?>" name="advanced_ad[width]">px</label>
-    <label><?php _e( 'height', 'advanced-ads' ); ?><input type="number" size="4" maxlength="4" value="<?php echo isset($ad->height) ? $ad->height : 0; ?>" name="advanced_ad[height]">px</label>
+    <label><?php _e( 'width', 'advanced-ads' ); ?><input type="number" value="<?php echo isset($ad->width) ? $ad->width : 0; ?>" name="advanced_ad[width]">px</label>
+    <label><?php _e( 'height', 'advanced-ads' ); ?><input type="number" value="<?php echo isset($ad->height) ? $ad->height : 0; ?>" name="advanced_ad[height]">px</label>
     <?php
     $show_reserve_space = in_array( $type->ID, array( 'plain', 'content', 'group', 'adsense' ) );
     $enable_reserve_space = $show_reserve_space && ! empty( $ad->output['add_wrapper_sizes'] ); ?>

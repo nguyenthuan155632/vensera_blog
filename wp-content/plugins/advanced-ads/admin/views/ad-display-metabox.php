@@ -1,11 +1,30 @@
 <?php
-$display_conditions = Advanced_Ads_Display_Conditions::get_instance()->conditions;
+$display_conditions = Advanced_Ads_Display_Conditions::get_instance()->get_conditions();
+
+// add mockup conditions if add-ons are missing
+$pro_conditions = array();
+if( ! defined( 'AAP_VERSION' ) ){
+	$pro_conditions[] = __( 'parent page', 'advanced-ads');
+	$pro_conditions[] = __( 'post meta', 'advanced-ads');
+	$pro_conditions[] = __( 'page template', 'advanced-ads');
+	$pro_conditions[] = __( 'url parameters', 'advanced-ads');
+}
+if( ! defined( 'AAR_VERSION') ){
+	$pro_conditions[] = __( 'accelerated mobile pages', 'advanced-ads');
+}
+asort( $pro_conditions );
+
 $options = $ad->options('conditions');
-// error_log(print_r($display_conditions, true));
-// error_log(print_r($options, true));
-?><div id="advads-display-conditions"><?php
-    // display help when no conditions are given
-    if( !is_array( $options ) || !count( $options )) :
+$empty_options = ( !is_array( $options ) || !count( $options ) );
+if( $empty_options ) :
+    ?><div class="advads-show-in-wizard">
+		<p><?php _e( 'Click on the button below if the ad should NOT show up on all pages when included automatically.', 'advanced-ads' ); ?></p>
+		<button type="button" class="button button-secondary" id="advads-wizard-display-conditions-show"><?php _e( 'Hide the ad on some pages', 'advanced-ads' ); ?></button>
+	</div>
+<?php endif; ?>
+<div id="advads-display-conditions" <?php if( $empty_options ) : ?>class="advads-hide-in-wizard"<?php endif; ?>>
+    <?php // display help when no conditions are given
+    if( $empty_options ) :
 	$options = array();
 	?><p><button type="button" class="advads-video-link-inline button button-primary"><?php _e( 'Watch video', 'advanced-ads' ); ?></button><?php
 	?>&nbsp;<a class="button button-secondary" href="<?php echo ADVADS_URL; ?>manual/display-conditions#utm_source=advanced-ads&utm_medium=link&utm_campaign=edit-display" target="_blank">
@@ -65,19 +84,26 @@ $options = $ad->options('conditions');
 			endif;
 			?></tbody></table>
     <input type="hidden" id="advads-display-conditions-index" value="<?php echo is_array($options) ? count($options) : 0; ?>"/>
-</div>
-<?php if (!isset($options) || count($options) == 0) :
+<?php if ( $empty_options ) :
     ?><p><?php _e('If you want to display the ad everywhere, don\'t do anything here. ', 'advanced-ads'); ?></p><?php
 endif;
-?><fieldset>
+?></div>
+<fieldset <?php if( $empty_options ) : ?>class="advads-hide-in-wizard"<?php endif; ?>>
     <legend><?php _e('New condition', 'advanced-ads'); ?></legend>
     <div id="advads-display-conditions-new">
 	<select>
 	    <option value=""><?php _e('-- choose a condition --', 'advanced-ads'); ?></option>
 	    <?php foreach ($display_conditions as $_condition_id => $_condition) : ?>
     	    <option value="<?php echo $_condition_id; ?>"><?php echo $_condition['label']; ?></option>
-	    <?php endforeach; ?>
-	</select>
+	    <?php endforeach;
+	    if( count( $pro_conditions ) ) :
+	    ?><optgroup label="<?php _e( 'Add-On features', 'advanced-ads' ); ?>"><?php
+		foreach ( $pro_conditions as $_pro_condition ) :
+		    ?><option disabled="disabled"><?php echo $_pro_condition; ?></option><?php
+		endforeach;
+	    ?></optgroup><?php
+	    endif; 
+	?></select>
 	<button type="button" class="button"><?php _e('add', 'advanced-ads'); ?></button>
 	<span class="advads-loader" style="display: none;"></span>
     </div>

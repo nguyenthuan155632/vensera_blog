@@ -33,7 +33,14 @@ function tonjoo_ecae_options_page()
  */
 function tonjoo_ecae_options_do_page() 
 {
-	global $select_options, $radio_options;
+	global $select_options, $radio_options, $disable_premium;
+
+	if(! function_exists('is_ecae_premium_exist')) {
+		$disable_premium = 'disabled';
+	}
+	else {
+		$disable_premium = '';
+	}
 
 	require_once( plugin_dir_path( __FILE__ ) . 'walker_dropdown_multiple.php');
 

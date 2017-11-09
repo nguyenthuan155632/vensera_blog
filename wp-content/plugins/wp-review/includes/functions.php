@@ -157,21 +157,14 @@ function wp_review_show_total($echo = true, $class = 'review-total-only', $post_
 }
 
 function wp_review_total_shortcode($atts, $content) {
-    if (empty($atts['class']))
-        $atts['class'] = 'review-total-only review-total-shortcode';
-    
-    if (empty($atts['id']))
-    	$atts['id'] = null;
-
+    $atts = shortcode_atts( array( 'id' => null, 'class' => 'review-total-only review-total-shortcode' ), $atts );
     $output = wp_review_show_total( false, $atts['class'], $atts['id'], array( 'shortcode' => true ) );
 
     return apply_filters( 'wp_review_total_shortcode', $output, $atts );
 }
 
 function wp_review_shortcode( $atts, $content = "") {
-    if (empty($atts['id']))
-    	$atts['id'] = null;
-
+    $atts = shortcode_atts( array( 'id' => null ), $atts );
     $output = wp_review_get_data($atts['id']);
 
     return apply_filters( 'wp_review_shortcode', $output, $atts );
@@ -181,6 +174,7 @@ function wp_review_visitor_rating_shortcode( $atts, $content = "" ) {
 	wp_enqueue_style( 'wp_review-style' );
 	wp_enqueue_script( 'wp_review-js' );
 
+    $atts = shortcode_atts( array( 'id' => null ), $atts );
 	$id = empty( $atts['id'] ) ? get_the_ID() : absint( $atts['id'] );
 
 	$text = '<div class="wp-review-' . $id . ' review-wrapper visitor-rating-shortcode">';

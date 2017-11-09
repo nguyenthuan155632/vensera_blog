@@ -1,10 +1,11 @@
 === Really Simple SSL ===
 Contributors: RogierLankhorst
+Donate link: https://www.paypal.me/reallysimplessl
 Tags: SSL, https, force SSL, mixed content, insecure content, secure website, website security, tls, security, secure socket layers, hsts
 Requires at least: 4.2
 License: GPL2
-Tested up to: 4.7.3
-Stable tag: 2.5.11
+Tested up to: 4.8
+Stable tag: 2.5.22
 
 No setup required! You only need an SSL certificate, and this plugin will do the rest.
 
@@ -34,8 +35,8 @@ some cool features.
 * Premium support
 
 = What does the plugin actually do =
-* The plugin handles most issues that Wordpress has with ssl, like the much discussed loadbalancer issue, or when there are no server variables set at all.
-* All incoming requests are redirected to https. If possible with .htaccess, or else with javascript.
+* The plugin handles most issues that Wordpress has with ssl, like when you're behind a revers proxy/loadbalancer, or when no headers are passed which WordPress can use to detect SSL.
+* All incoming requests are redirected to https. Default with an internal WordPress redirect, but you can also enable a .htaccess redirect.
 * The site url and home url are changed to https.
 * Your insecure content is fixed by replacing all http:// urls with https://, except hyperlinks to other domains. Dynamically, so no database changes are made (except for the siteurl and homeurl).
 
@@ -73,7 +74,63 @@ For detailed instructions on how to find mixed content read this [article](https
 = Redirect loop issues =
 If you are experiencing redirect loops on your site, try these [instructions](https://really-simple-ssl.com/knowledge-base/my-website-is-in-a-redirect-loop/).
 
+= Is the plugin multisite compatible? =
+Yes. There is a dedicated network settings page where you can switch between network activated SSL and per page SSL. In the dedicated pro for multisite plugin, you can override all site settings for SSL on the network level, and can activate and deactivate SSL in the network menu for each site.
+
 == Changelog ==
+= 2.5.22 =
+* Changed mixed content fixer hook back from wp_print_footer_scripts to shutdown
+
+= 2.5.21 =
+* Fixed double slash in paths to files
+* Fixed typo in activation notice.
+* Tweak: added option to not flush the rewrite rules
+* Fix: prevent forcing admin_url to http when FORCE_SSL_ADMIN is defined
+
+= 2.5.20 =
+* Tweak: constant RSSSL_DISMISS_ACTIVATE_SSL_NOTICE to allow users to hide notices.
+* Tweak: setting to switch the mixed content fixer hook from template_redirect to init.
+* Fix: nag in multisite didn't dismiss properly
+
+= 2.5.19 =
+* Multisite fix: due to a merge admin_url and site_url filters were dropped, re-added them
+* Added constant RSSSL_CONTENT_FIXER_ON_INIT so users can keep on using the init hook for the mixed content fixer.
+
+= 2.5.18 =
+* Tweak: Removed JetPack fix, as it is now incorporated in JetPack.
+* Tweak: Moved mixed content fixer hook to template_redirect
+* Fix: Changed flush rewrite rules hook from admin_init to shutdown, on activation of SSL.
+* Multisite fix: Changed function which checks if admin_url and site_url should return http or https to check for https in home_url.
+* Tweak: Explicitly excluded json and xmlrpc requests from the mixed content fixer
+
+= 2.5.17 =
+* Tweak: Added a function where the home_url and site_url on multisite check if it should be http or https when SSL is enabled on a per site basis.
+* Tweak: Added a notice that there will be no network menu when Really Simple SSL is activated per site.
+* Tweak: Added hook for new multisite site so a new site will be activated as SSL when network wide is activated.
+* Tweak: limited the JetPack listen on port 80 tweak to reverse proxy servers.
+* Tweak: created a dedicated rest api redirect constant in case users want to prevent the rest api from redirecting to https.
+* Fix: dismissal of SSL activated notice on multisite did not work properly
+
+= 2.5.16 =
+* Reverted wp_safe_redirect to wp_redirect, as wp_safe_redirect causes a redirect to wp-login.php even when the primary url is domain.com and request url www.domain.com
+
+= 2.5.15 =
+* No functional changes, version change because WordPress was not processing the version update
+
+= 2.5.14 =
+* Fix: fixed issue in the mixed content fixer where on optimized html the match would match across elements.
+* replaced wp_redirect with wp_safe_redirect
+* Added force SSL on wp_rest_api
+
+= 2.5.13 =
+* Tweak: configuration more function
+
+= 2.5.12 =
+* Added multisite settings page
+* Added filter for .htaccess code output
+* Increased user capability to "activate_plugins"
+* Added SSL_FORWARDED_PROTO = 1 in addition to SSL_FORWARDED_PROTO = on as supported SSL recognition variable.
+
 = 2.5.11 =
 * Removed curl in favor of wp_remote_get
 
@@ -382,3 +439,6 @@ Always back up before any upgrade. Especially .htaccess, wp-config.php and the p
 == Screenshots ==
 1. After activation, if SSL was detected, you can enable SSL.
 2. View your configuration on the settings page
+
+== Frequently asked questions ==
+* Really Simple SSL maintains an extensive knowledge-base at https://www.really-simple-ssl.com.

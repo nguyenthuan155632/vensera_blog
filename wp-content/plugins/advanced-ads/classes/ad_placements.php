@@ -30,7 +30,8 @@ class Advanced_Ads_Placements {
 			'default' => array(
 				'title' => __( 'Manual Placement', 'advanced-ads' ),
 				'description' => __( 'Manual placement to use as function or shortcode.', 'advanced-ads' ),
-				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/manual.png'
+				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/manual.png',
+				'options' => array( 'show_position' => true, 'show_lazy_load' => true )
 				),
 			'header' => array(
 				'title' => __( 'Header Code', 'advanced-ads' ),
@@ -45,22 +46,26 @@ class Advanced_Ads_Placements {
 			'post_top' => array(
 				'title' => __( 'Before Content', 'advanced-ads' ),
 				'description' => __( 'Injected before the post content.', 'advanced-ads' ),
-				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/content-before.png'
+				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/content-before.png',
+				'options' => array( 'show_position' => true, 'show_lazy_load' => true, 'uses_the_content' => true )
 				),
 			'post_bottom' => array(
 				'title' => __( 'After Content', 'advanced-ads' ),
 				'description' => __( 'Injected after the post content.', 'advanced-ads' ),
-				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/content-after.png'
+				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/content-after.png',
+				'options' => array( 'show_position' => true, 'show_lazy_load' => true, 'uses_the_content' => true )
 				),
 			'post_content' => array(
 				'title' => __( 'Content', 'advanced-ads' ),
 				'description' => __( 'Injected into the content. You can choose the paragraph after which the ad content is displayed.', 'advanced-ads' ),
-				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/content-within.png'
+				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/content-within.png',
+				'options' => array( 'show_position' => true, 'show_lazy_load' => true, 'uses_the_content' => true )
 				),
 			'sidebar_widget' => array(
 				'title' => __( 'Sidebar Widget', 'advanced-ads' ),
 				'description' => __( 'Create a sidebar widget with an ad. Can be placed and used like any other widget.', 'advanced-ads' ),
-				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/widget.png'
+				'image' => ADVADS_BASE_URL . 'admin/assets/img/placements/widget.png',
+				'options' => array( 'show_lazy_load' => true )
 				),
 		);
 		return apply_filters( 'advanced-ads-placement-types', $types );
@@ -308,9 +313,16 @@ class Advanced_Ads_Placements {
 
 			// add the placement to the global output array
 			$advads = Advanced_Ads::get_instance();
-			$advads->current_ads[] = array('type' => 'placement', 'id' => $id, 'title' => $placement['name']);
+			$name = isset( $placement['name'] ) ? $placement['name'] : $id;
+			$advads->current_ads[] = array( 'type' => 'placement', 'id' => $id, 'title' => $name );
 
-			return Advanced_Ads_Select::get_instance()->get_ad_by_method( (int) $_item[1], $_item[0], $args );
+			$result = Advanced_Ads_Select::get_instance()->get_ad_by_method( (int) $_item[1], $_item[0], $args );
+
+			if ( $result && ! empty( $args['placement_clearfix'] ) ) {
+				$result .= '<br style="clear: both; display: block; float: none; color:blue;"/>';
+			}
+
+			return $result;
 		}
 	}
 
@@ -325,6 +337,10 @@ class Advanced_Ads_Placements {
 	 * @link inspired by http://www.wpbeginner.com/wp-tutorials/how-to-insert-ads-within-your-post-content-in-wordpress/
 	 */
 	public static function &inject_in_content($placement_id, $options, &$content) {
+	    
+		// get plugin options
+		$plugin_options = Advanced_Ads::get_instance()->options();
+	    
 		// test ad is emtpy
 		$whitespaces = json_decode('"\t\n\r \u00A0"');
 		$adContent = Advanced_Ads_Select::get_instance()->get_ad_by_method( $placement_id, 'placement', $options );
@@ -393,6 +409,11 @@ class Advanced_Ads_Placements {
 		// if there are too few items at this level test nesting
 		$options['itemLimit'] = $tag === 'p' ? 2 : 1;
 
+		// trigger such a high item limit that all elements will be considered
+		if( ! empty($plugin_options['content-injection-level-disabled'] ) ){
+			$options['itemLimit'] = 1000;
+		}
+		
 		// allow hooks to change some options
 		$options = apply_filters(
 			'advanced-ads-placement-content-injection-options',
@@ -403,14 +424,14 @@ class Advanced_Ads_Placements {
 			$items = $xpath->query('/html/body/*/' . $tag);
 		}
 		// try third level
-		if ($items->length < $options['itemLimit']) {
+		if ( $items->length < $options['itemLimit'] ) {
 			$items = $xpath->query('/html/body/*/*/' . $tag);
 		}
 		// try all levels as last resort
 		if ( $items->length < $options['itemLimit'] ) {
 			$items = $xpath->query( '//' . $tag );
 		}
-
+		
 		// allow to select other elements
 		$items = apply_filters( 'advanced-ads-placement-content-injection-items', $items, $xpath, $tag );
 
@@ -474,6 +495,23 @@ class Advanced_Ads_Placements {
 			}
 
 			libxml_use_internal_errors(false);
+		/**
+		 * show a warning to ad admins in the Ad Health bar in the frontend, when
+		 * 
+		 * * the level limitation was not disabled
+		 * * could not inject one ad (as by use of `elseif` here)
+		 * * but there are enough elements on the site, but just in sub-containers
+		 * 
+		 */
+		} elseif( current_user_can( Advanced_Ads_Plugin::user_cap( 'advanced_ads_manage_options') )  
+			&& empty($plugin_options['content-injection-level-disabled'] )  ) {
+			
+			// check if there are more elements without limitation 
+			$all_items = $xpath->query( '//' . $tag );
+			if( $paragraph_id <= $all_items->length ){
+				// add a warning to ad health
+				add_filter( 'advanced-ads-ad-health-nodes', array( 'Advanced_Ads_Placements', 'add_ad_health_node' ) );
+			}
 		}
 
 		// convert to text-representation
@@ -497,6 +535,26 @@ class Advanced_Ads_Placements {
 	}
 
 	/**
+	 * Add a warning to 'Ad health'.
+	 *
+	 * @param array $nodes.
+	 * @return array $nodes.
+	 */
+	public static function add_ad_health_node( $nodes ) {
+		$nodes[] = array( 'type' => 1, 'data' => array(
+			'parent' => 'advanced_ads_ad_health',
+			'id'    => 'advanced_ads_ad_health_the_content_not_enough_elements',
+			'title' => sprintf(__( 'Set <em>%s</em> to show more ads', 'advanced-ads' ), __('Disable level limitation', 'advanced-ads' ) ),
+			'href'  => admin_url( '/admin.php?page=advanced-ads-settings#top#general' ),
+			'meta'   => array(
+				'class' => 'advanced_ads_ad_health_warning',
+				'target' => '_blank'
+			)
+		) );
+		return $nodes;
+	}
+
+	/**
 	 * check if the placement can be displayed
 	 *
 	 * @since 1.6.9
@@ -511,4 +569,23 @@ class Advanced_Ads_Placements {
 		return apply_filters( 'advanced-ads-can-display-placement', true, $id );
 	}
 
+	/**
+	 * Get the placements that includes the ad or group.
+	 *
+	 * @param string $type 'ad' or 'group'.
+	 * @param int $id Id.
+	 * @return array
+	 */
+	public static function get_placements_by( $type, $id ) {
+		$result = array();
+
+		$placements = Advanced_Ads::get_ad_placements_array();
+		foreach ( $placements as $_id => $_placement ) {
+			if ( isset( $_placement['item'] ) && $_placement['item'] === $type . '_' . $id ) {
+				$result[ $_id ] = $_placement;
+			}
+		}
+
+		return $result;
+	}
 }

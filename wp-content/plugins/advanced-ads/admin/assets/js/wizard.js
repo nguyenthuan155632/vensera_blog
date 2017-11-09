@@ -4,22 +4,24 @@ jQuery( document ).ready(function ($) {
 });
 var advads_wizard = {
     box_order: [ // selectors of elements in the wizard in the correct order
-	'#post-body-content',
-	'#ad-main-box',
+	'#post-body-content, #ad-main-box', // show title and type together
 	'#ad-parameters-box',
-	'#ad-output-box',
-	'#ad-display-box',
-	'#ad-visitor-box',
+	// '#ad-output-box',
+	'#ad-display-box, #ad-visitor-box', // display and visitor conditions
 	// '#advanced_ads_groupsdiv',
 	// '#submitdiv'
     ],
-    current_box: '#post-body-content', // current active box
+    current_box: '#post-body-content, #ad-main-box', // current active box
     one_column: false, // whether the edit screen is in one-column mode
-    init: function(){
+    status: false, // what is the current status? true if running, else false
+    init: function( status ){ // status can be "start" to start wizard or nothing to not start it
 	var _this = this;
 	jQuery('#advads-wizard-controls-next').click( function( ){ _this.next(); } );
 	jQuery('#advads-wizard-controls-prev').click( function( ){ _this.prev(); } );
 	jQuery('#advads-wizard-controls-save').click( function( e ){ e.preventDefault(); jQuery('#publish').click(); } ); // save ad
+	jQuery('#advads-wizard-display-conditions-show').click( function( ){ _this.show_conditions( '#ad-display-box' ); } );
+	jQuery('#advads-wizard-visitor-conditions-show').click( function( ){ _this.show_conditions( '#ad-visitor-box' ); } );
+	jQuery( '.advads-show-in-wizard').hide();
 	jQuery( '#advads-start-wizard' ).click( function(){
 	    _this.start();
 	});
@@ -27,47 +29,54 @@ var advads_wizard = {
 	jQuery( '.advads-stop-wizard' ).click( function(){
 	    _this.close();
 	});
+	// jump to next box when ad type is selected
+	jQuery('#advanced-ad-type input').change(function(e){
+	    _this.next();
+	});
     },
     show_current_box: function(){
 	jQuery( this.current_box ).removeClass('advads-hide');
     },
     start: function(){ // do stuff when wizard is started
 	// show page in 1-column stype
+	this.status = true;
 	if( jQuery( '#post-body').hasClass('columns-1') ){
 	    this.one_column = true;
 	} else {
 	    jQuery( '#post-body').addClass( 'columns-1' ).removeClass( 'columns-2' );
 	}
 	// hide all boxes, messages and the headline by adding a hide css class
-	jQuery('#post-body-content, .postbox-container .postbox, h1 ~ div:not(.advads-admin-notice), h1').addClass( 'advads-hide' );
+	jQuery('#post-body-content, .postbox-container .postbox, h1 ~ div:not(.advads-admin-notice):not(#message.updated), h1').addClass( 'advads-hide' );
 	// display first box
 	this.show_current_box();
 	// display close button and controls
 	jQuery('#advads-stop-wizard, #advads-wizard-controls').removeClass('hidden')
 	this.update_nav();
-	this.callbacks();
 	// initially hide some elemente
 	jQuery( '#advads-ad-description').addClass('advads-hide'); // ad description
 	jQuery( '#advads-ad-info').addClass('advads-hide'); // shortcode and php function info
 	// hide all elements with 'advads-hide-for-wizard' class
 	jQuery( '.advads-hide-in-wizard').hide();
+	jQuery( '.advads-show-in-wizard').show();
+	jQuery( '#advads-start-wizard' ).hide();
 	// remove close-class from ad type box
 	jQuery( '#ad-main-box' ).removeClass('closed');
 	this.save_hide_wizard( false );
-	// jump to next box when ad type is selected
-	jQuery('#advanced-ad-type input').change(function(){
-	    _this.next();
-	});
     },
     close: function(){ // close the wizard by showing all elements again
+	this.status = false;
 	jQuery('*').removeClass('advads-hide');
 	jQuery('#advads-stop-wizard, #advads-wizard-controls').addClass('hidden');
 	if( this.one_column !== true ){
 	    jQuery( '#post-body').addClass( 'columns-2' ).removeClass( 'columns-1' );
 	}
+	// reset current box
+	this.current_box = this.box_order[0];
 	jQuery('#advads-wizard-welcome').remove();// close wizard welcome message
 	// show all elements with 'advads-hide-for-wizard' class
 	jQuery( '.advads-hide-in-wizard').show();
+	jQuery( '.advads-show-in-wizard').hide();
+	jQuery( '#advads-start-wizard' ).show();
 	this.save_hide_wizard( true );
     },
     update_nav: function(){ // update navigation, display only valid buttons
@@ -81,20 +90,15 @@ var advads_wizard = {
 	if( i === 0 ){
 	    jQuery('#advads-wizard-controls-prev').addClass('hidden');
 	}
-	// hide stop wizard button in bottom navi
-	if( i !== 0 ){
-	    jQuery('#advads-wizard-controls .advads-stop-wizard').addClass('hidden');
-	} else {
-	    jQuery('#advads-wizard-controls .advads-stop-wizard').removeClass('hidden');
-	}
 	// hide save button for first boxes
-	if( i <= 2 ){
+	if( i <= 1 ){
 	    jQuery('#advads-wizard-controls-save').addClass('hidden');
 	} else {
 	    jQuery('#advads-wizard-controls-save').removeClass('hidden');
 	}
     },
     next: function(){ // show next box
+	if( ! this.status ){ return }
 	// get index of current item in box-array
 	var i = this.box_order.indexOf( this.current_box );
 	// check if there is a next index
@@ -107,7 +111,6 @@ var advads_wizard = {
 	this.current_box = this.box_order[ i + 1 ];
 	this.show_current_box();
 	this.update_nav();
-	this.callbacks();
     },
     prev: function(){ // show previous box
 	// get index of current item in box-array
@@ -122,16 +125,6 @@ var advads_wizard = {
 	this.current_box = this.box_order[ i - 1 ];
 	this.show_current_box();
 	this.update_nav();
-	this.callbacks();
-    },
-    callbacks: function(){ // a number of custom settings for some of the boxes
-	return;
-	switch( this.current_box ){
-	    case '#post-body-content' :
-		// hide shortcode and php information
-		
-		break;
-	}
     },
     save_hide_wizard: function( hide_wizard ){ // update wizard state (started by default or not?)
 
@@ -143,5 +136,9 @@ var advads_wizard = {
 			    hide_wizard: hide_wizard,
 		    },
 	    });
-    }
+    },
+    show_conditions: function( box ){ // show the conditions options in display and visitor conditions
+	    jQuery( box ).find('.advads-show-in-wizard').hide();
+	    jQuery( box ).find('.advads-hide-in-wizard').show();
+    },
 };

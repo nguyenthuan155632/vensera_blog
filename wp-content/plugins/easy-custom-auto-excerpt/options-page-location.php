@@ -39,7 +39,7 @@
 			echo '.advanced_archive{ display: table-row; }';
 			echo '.advanced_archive_width{ display: table-row; }';
 		}
-		elseif($options['advanced_frontpage'] == 'all')
+		elseif($options['advanced_archive'] == 'all')
 		{
 			echo '.advanced_archive{ display: none; }';
 			echo '.advanced_archive_width{ display: table-row; }';
@@ -74,27 +74,27 @@ $excerpt_yes_options = array(
 	'0' => array(
 		'value' =>	'no',
 		'label' =>  __('No',TONJOO_ECAE)
-		),
+	),
 	'1' => array(
 		'value' =>	'yes',
 		'label' =>  __('Yes',TONJOO_ECAE) 
-		)
-	);
+	)
+);
 
 $advanced_all_selection = array(
 	'0' => array(
 		'value' =>	'disable',
 		'label' =>  __('Disable',TONJOO_ECAE)
-		),
+	),
 	'1' => array(
 		'value' =>	'all',
 		'label' =>  __('All Content',TONJOO_ECAE)
-		),
+	),
 	'2' => array(
 		'value' =>	'selection',
 		'label' =>  __('Selected Post type and Categories',TONJOO_ECAE)
-		)
-	);
+	)
+);
 
 
 $search_select = array(
@@ -103,7 +103,7 @@ $search_select = array(
 	"label" => __("Search excerpt",TONJOO_ECAE),
 	"value" => $options['search'],
 	"select_array" => $excerpt_yes_options,
-	);
+);
 
 $home_select = array(
 	"name"=>"tonjoo_ecae_options[home]",
@@ -111,7 +111,7 @@ $home_select = array(
 	"label" => __("Blog page excerpt",TONJOO_ECAE),
 	"value" => $options['home'],
 	"select_array" => $excerpt_yes_options,
-	);
+);
 
 $front_page_select = array(
 	"name"=>"tonjoo_ecae_options[front_page]",
@@ -119,7 +119,7 @@ $front_page_select = array(
 	"label" => __("Front page excerpt",TONJOO_ECAE),
 	"value" => $options['front_page'],
 	"select_array" => $excerpt_yes_options,
-	);
+);
 
 $archive_select = array(
 	"name"=>"tonjoo_ecae_options[archive]",
@@ -127,7 +127,7 @@ $archive_select = array(
 	"label" => __("Archive excerpt",TONJOO_ECAE),
 	"value" => $options['archive'],
 	"select_array" => $excerpt_yes_options,
-	);
+);
 
 /**
  * Excerpt in page
@@ -141,6 +141,7 @@ $args = array(
     'exclude'	=> "$page_on_front,$page_for_posts",
     'walker' 	=> new Walker_PageDropdown_Multiple()
 );
+
 $exc_in_page = wp_dropdown_pages( $args );
 $exc_in_page = preg_replace( '#^\s*<select[^>]*>#', '', $exc_in_page );
 $exc_in_page = preg_replace( '#</select>\s*$#', '', $exc_in_page );
@@ -513,7 +514,7 @@ tj_print_select_option($advanced_select);
 						<td colspan="2" class="country">
 							<div class="ordinary-select-2">
 							<select name="page_post_type[0][]" multiple="multiple" class="page_post_type_select">
-							<option selected="selected" value="0" locked="locked">Select</option>
+							<!-- <option selected="selected" value="0" locked="locked">Select</option> -->
 							<?php post_type_excerpt('page_post_type',$options,true) ?>
 							</select>
 							</div>
@@ -525,7 +526,7 @@ tj_print_select_option($advanced_select);
 						<td colspan="2">
 							<div class="ordinary-select-2">
 							<select name="page_category[0][]" multiple="multiple" class="page_category_select">
-							<option selected="selected" value="0" locked="locked">Select</option>
+							<!-- <option selected="selected" value="0" locked="locked">Select</option> -->
 							<?php category_excerpt('page_category',$options,true) ?>
 							</select>
 							</div>
@@ -563,7 +564,7 @@ tj_print_select_option($advanced_select);
 						<td colspan="2" class="country">
 							<div class="ordinary-select-2">
 							<select name="page_post_type[<?php echo $i ?>][]" multiple="multiple" class="page_post_type_select">
-							<option value="0" selected="selected" locked="locked">Select</option>
+							<!-- <option value="0" selected="selected" locked="locked">Select</option> -->
 							<?php post_type_excerpt('page_post_type',$options,true,$page_post_type[$i]) ?>
 							</select>
 							</div>
@@ -575,7 +576,7 @@ tj_print_select_option($advanced_select);
 						<td colspan="2">
 							<div class="ordinary-select-2">
 							<select name="page_category[<?php echo $i ?>][]" multiple="multiple" class="page_category_select">
-							<option value="0" selected="selected" locked="locked">Select</option>
+							<!-- <option value="0" selected="selected" locked="locked">Select</option> -->
 							<?php category_excerpt('page_category',$options,true,$page_category[$i]) ?>
 							</select>
 							</div>

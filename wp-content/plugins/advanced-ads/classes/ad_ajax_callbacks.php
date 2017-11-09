@@ -48,17 +48,19 @@ class Advanced_Ads_Ad_Ajax_Callbacks {
 		}
 
 		$types = Advanced_Ads::get_instance()->ad_types;
-		$type = $_REQUEST['ad_type'];
+		$type_string = $_REQUEST['ad_type'];
 		$ad_id = absint( $_REQUEST['ad_id'] );
 		if ( empty($ad_id) ) { die(); }
 
 		$ad = new Advanced_Ads_Ad( $ad_id );
 
-		if ( ! empty($types[$type]) && method_exists( $types[$type], 'render_parameters' ) ) {
-			$type = $types[ $type ];
+		if ( ! empty($types[$type_string]) && method_exists( $types[$type_string], 'render_parameters' ) ) {
+			$type = $types[ $type_string ];
 			$type->render_parameters( $ad );
 
-			include ADVADS_BASE_PATH . 'admin/views/ad-parameters-size.php';
+			if( 'dummy' !== $type_string ) :
+			    include ADVADS_BASE_PATH . 'admin/views/ad-parameters-size.php';
+			endif;
 		}
 
 		die();
@@ -141,7 +143,7 @@ class Advanced_Ads_Ad_Ajax_Callbacks {
             if ( !isset( $_POST['search'] ) || $_POST['search'] === '' ) { die(); }
 
             // if search is an id, search for the term id, else do a full text search
-            if(0 !== absint($_POST['search'])){
+            if( 0 !== absint($_POST['search'] ) && strlen( $_POST['search'] ) == strlen ( absint($_POST['search'] ) ) ){
                 $args['include'] = array(absint($_POST['search']));
             } else {
                 $args['search'] = $_POST['search'];
@@ -263,10 +265,10 @@ class Advanced_Ads_Ad_Ajax_Callbacks {
 		if ( ! current_user_can( Advanced_Ads_Plugin::user_cap( 'advanced_ads_edit_ads') ) ) {
 			die();
 		}
-
-	    $ad_id = absint( $_REQUEST['ad_id'] );
-	    if ( empty( $ad_id ) ) { die(); }
-
+		
+		$ad_id = absint( $_REQUEST['ad_id'] );
+		if ( empty( $ad_id ) ) { die(); }
+		
 		// use existing placement
 		if ( isset( $_REQUEST['placement_slug'] ) ) {
 			$xml_array[] = '<placements type="array">';

@@ -229,7 +229,11 @@ function wpseo_upsert_meta( $post_id, $new_meta_value, $orig_meta_value, $meta_k
 	if ( ! $post_type_object ) {
 
 		$upsert_results['status']  = 'failure';
-		$upsert_results['results'] = sprintf( __( 'Post has an invalid Post Type: %s.', 'wordpress-seo' ), $the_post->post_type );
+		$upsert_results['results'] = sprintf(
+			/* translators: %s expands to post type. */
+			__( 'Post has an invalid Post Type: %s.', 'wordpress-seo' ),
+			$the_post->post_type
+		);
 
 		return $upsert_results;
 	}
@@ -237,7 +241,11 @@ function wpseo_upsert_meta( $post_id, $new_meta_value, $orig_meta_value, $meta_k
 	if ( ! current_user_can( $post_type_object->cap->edit_posts ) ) {
 
 		$upsert_results['status']  = 'failure';
-		$upsert_results['results'] = sprintf( __( 'You can\'t edit %s.', 'wordpress-seo' ), $post_type_object->label );
+		$upsert_results['results'] = sprintf(
+			/* translators: %s expands to post type name. */
+			__( 'You can\'t edit %s.', 'wordpress-seo' ),
+			$post_type_object->label
+		);
 
 		return $upsert_results;
 	}
@@ -245,7 +253,11 @@ function wpseo_upsert_meta( $post_id, $new_meta_value, $orig_meta_value, $meta_k
 	if ( ! current_user_can( $post_type_object->cap->edit_others_posts ) && $the_post->post_author != get_current_user_id() ) {
 
 		$upsert_results['status']  = 'failure';
-		$upsert_results['results'] = sprintf( __( 'You can\'t edit %s that aren\'t yours.', 'wordpress-seo' ), $post_type_object->label );
+		$upsert_results['results'] = sprintf(
+			/* translators: %s expands to the name of a post type (plural). */
+			__( 'You can\'t edit %s that aren\'t yours.', 'wordpress-seo' ),
+			$post_type_object->label
+		);
 
 		return $upsert_results;
 
@@ -364,9 +376,9 @@ add_action( 'wp_ajax_get_focus_keyword_usage',  'ajax_get_keyword_usage' );
 function ajax_get_term_keyword_usage() {
 	$post_id = filter_input( INPUT_POST, 'post_id' );
 	$keyword = filter_input( INPUT_POST, 'keyword' );
-	$taxonomyName = filter_input( INPUT_POST, 'taxonomy' );
+	$taxonomy_name = filter_input( INPUT_POST, 'taxonomy' );
 
-	$taxonomy = get_taxonomy( $taxonomyName );
+	$taxonomy = get_taxonomy( $taxonomy_name );
 
 	if ( ! $taxonomy ) {
 		wp_die( 0 );
@@ -376,7 +388,7 @@ function ajax_get_term_keyword_usage() {
 		wp_die( -1 );
 	}
 
-	$usage = WPSEO_Taxonomy_Meta::get_keyword_usage( $keyword, $post_id, $taxonomyName );
+	$usage = WPSEO_Taxonomy_Meta::get_keyword_usage( $keyword, $post_id, $taxonomy_name );
 
 	// Normalize the result so it it the same as the post keyword usage AJAX request.
 	$usage = $usage[ $keyword ];
@@ -392,13 +404,13 @@ add_action( 'wp_ajax_get_term_keyword_usage',  'ajax_get_term_keyword_usage' );
  * Removes stopword from the sample permalink that is generated in an AJAX request
  *
  * @param array  $permalink The permalink generated for this post by WordPress.
- * @param int    $post_ID The ID of the post.
- * @param string $title The title for the post that the user used.
- * @param string $name The name for the post that the user used.
+ * @param int    $post_id   The ID of the post.
+ * @param string $title     The title for the post that the user used.
+ * @param string $name      The name for the post that the user used.
  *
  * @return array
  */
-function wpseo_remove_stopwords_sample_permalink( $permalink, $post_ID, $title, $name ) {
+function wpseo_remove_stopwords_sample_permalink( $permalink, $post_id, $title, $name ) {
 	WPSEO_Options::get_instance();
 	$options = WPSEO_Options::get_options( array( 'wpseo_permalinks' ) );
 	if ( $options['cleanslugs'] !== true ) {
@@ -422,10 +434,10 @@ function wpseo_remove_stopwords_sample_permalink( $permalink, $post_ID, $title, 
 add_action( 'get_sample_permalink', 'wpseo_remove_stopwords_sample_permalink', 10, 4 );
 
 // Crawl Issue Manager AJAX hooks.
-new WPSEO_GSC_Ajax;
+new WPSEO_GSC_Ajax();
 
 // SEO Score Recalculations.
-new WPSEO_Recalculate_Scores_Ajax;
+new WPSEO_Recalculate_Scores_Ajax();
 
 new Yoast_Dashboard_Widget();
 

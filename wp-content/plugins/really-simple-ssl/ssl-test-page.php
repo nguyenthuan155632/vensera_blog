@@ -4,7 +4,7 @@
  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
 </head>
 <body>
-<h1>SSL test page</h1>
+<h1>#SSL TEST PAGE#</h1>
 <p>This page is used purely to test for ssl availability.</p>
 <?php
 	$ssl = FALSE;
@@ -45,7 +45,7 @@
     $ssl = TRUE;
   }
 
-  if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && ($_SERVER['HTTP_X_FORWARDED_SSL'] == 'on')){
+  if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && ($_SERVER['HTTP_X_FORWARDED_SSL'] == 'on' || $_SERVER['HTTP_X_FORWARDED_SSL'] == 1)){
     echo "#CDN#<br>";
     $ssl = TRUE;
   }

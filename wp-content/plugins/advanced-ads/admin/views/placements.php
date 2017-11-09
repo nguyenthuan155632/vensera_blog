@@ -10,7 +10,6 @@
 	?><div id="message" class="updated"><p><?php _e( 'Placements updated', 'advanced-ads' ); ?></p></div><?php
 	endif; ?>
 <?php endif; ?>
-    <?php screen_icon(); ?>
     <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
     <p class="description"><?php _e( 'Placements are physically places in your theme and posts. You can use them if you plan to change ads and ad groups on the same place without the need to change your templates.', 'advanced-ads' ); ?></p>
     <p class="description"><?php printf( __( 'See also the manual for more information on <a href="%s">placements</a>.', 'advanced-ads' ), ADVADS_URL . 'manual/placements/#utm_source=advanced-ads&utm_medium=link&utm_campaign=placements' ); ?></p>
@@ -57,94 +56,102 @@
                             <td><?php echo $_placement['name']; ?><br/>
 				<?php if( ! isset( $_placement['type'] ) || 'default' === $_placement['type']) :
 				    $_placement['type'] = 'default';
-				    ?><a class="usage-link"><?php _e( 'show usage', 'advanced-ads' ); ?></a><div class="hidden advads-usage">
-				    <label><?php _e( 'shortcode', 'advanced-ads' ); ?>
-					<code><input type="text" onclick="this.select();" value='[the_ad_placement id="<?php echo $_placement_slug; ?>"]'/></code>
-				    </label>
-				    <label><?php _e( 'template', 'advanced-ads' ); ?>
-					<code><input type="text" onclick="this.select();" value="the_ad_placement('<?php echo $_placement_slug; ?>');"/></code>
-				    </label>
-				</div><?php
+				    ?><a class="usage-link"><?php _e( 'show usage', 'advanced-ads' ); ?></a><?php
 				 endif;
 			    ?></td>
                             <td class="advads-placements-table-options">
+				<?php if( ! isset( $_placement['type'] ) || 'default' === $_placement['type']) : ?>
+				<div class="hidden advads-usage">
+				    <label><?php _e( 'shortcode', 'advanced-ads' ); ?>
+					<code><input type="text" onclick="this.select();" value='[the_ad_placement id="<?php echo $_placement_slug; ?>"]'/></code>
+				    </label>
+				    <label><?php _e( 'template (PHP)', 'advanced-ads' ); ?>
+					<code><input type="text" onclick="this.select();" value="if( function_exists('the_ad_placement') ) { the_ad_placement('<?php echo $_placement_slug; ?>'); }"/></code>
+				    </label>
+				</div>
+				<?php endif; ?>
+				
                                 <?php do_action( 'advanced-ads-placement-options-before', $_placement_slug, $_placement ); ?>
-                                <label for="adsads-placements-item-<?php echo $_placement_slug; ?>"><?php _e( 'Item', 'advanced-ads' ); ?></label>
-                                <select id="adsads-placements-item-<?php echo $_placement_slug; ?>" name="advads[placements][<?php echo $_placement_slug; ?>][item]">
-                                    <option value=""><?php _e( '--not selected--', 'advanced-ads' ); ?></option>
-                                        <?php if ( isset($items['groups']) ) : ?>
-                                        <optgroup label="<?php _e( 'Ad Groups', 'advanced-ads' ); ?>">
-                                            <?php foreach ( $items['groups'] as $_item_id => $_item_title ) : ?>
-                                                <option value="<?php echo $_item_id; ?>" <?php if ( isset($_placement['item']) ) { selected( $_item_id, $_placement['item'] ); } ?>><?php echo $_item_title; ?></option>
-                                        <?php endforeach; ?>
-                                        </optgroup>
-                                        <?php endif; ?>
-                                        <?php if ( isset($items['ads']) ) : ?>
-                                        <optgroup label="<?php _e( 'Ads', 'advanced-ads' ); ?>">
-                                        <?php foreach ( $items['ads'] as $_item_id => $_item_title ) : ?>
-                                                <option value="<?php echo $_item_id; ?>" <?php if ( isset($_placement['item']) ) { selected( $_item_id, $_placement['item'] ); } ?>><?php echo $_item_title; ?></option>
-                                        <?php endforeach; ?>
-                                        </optgroup>
-                                        <?php endif; ?>
-                                </select><br/>
-                                <?php
-								switch ( $_placement['type'] ) :
-									case 'post_content' :
-										?><div class="advads-placement-options"><?php
-										_e( 'Inject', 'advanced-ads' );
-										$_positions = array('after' => __( 'after', 'advanced-ads' ), 'before' => __( 'before', 'advanced-ads' )); ?>
-                                        <select name="advads[placements][<?php echo $_placement_slug; ?>][options][position]">
-                                            <?php foreach ( $_positions as $_pos_key => $_pos ) : ?>
-                                            <option value="<?php echo $_pos_key; ?>" <?php if ( isset($_placement['options']['position']) ) { selected( $_placement['options']['position'], $_pos_key ); } ?>><?php echo $_pos; ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-
-                                        <input type="number" name="advads[placements][<?php echo $_placement_slug; ?>][options][index]" value="<?php
-										echo (isset($_placement['options']['index'])) ? $_placement['options']['index'] : 1;
-										?>"/>.
-
-                                        <?php $tags = Advanced_Ads_Placements::tags_for_content_injection(); ?>
-                                        <select name="advads[placements][<?php echo $_placement_slug; ?>][options][tag]">
-                                            <?php foreach ( $tags as $_tag_key => $_tag ) : ?>
-                                            <option value="<?php echo $_tag_key; ?>" <?php if ( isset($_placement['options']['tag']) ) { selected( $_placement['options']['tag'], $_tag_key ); } ?>><?php echo $_tag; ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-
-					<p><label><input type="checkbox" name="advads[placements][<?php echo $_placement_slug; ?>][options][start_from_bottom]" value="1" <?php
-					if (isset($_placement['options']['start_from_bottom'])) { checked( $_placement['options']['start_from_bottom'], 1); }
-					?>/><?php _e( 'start counting from bottom', 'advanced-ads' ); ?></label></p>
-                                        </div>
-					<?php if( ! function_exists( 'mb_convert_encoding' ) ) : ?>
+				
+				<?php 
+				ob_start();
+				include ADVADS_BASE_PATH . 'admin/views/placements-item.php';
+				$item_option_content = ob_get_clean();
+				
+				Advanced_Ads_Admin_Options::render_option( 
+					'placement-item', 
+					__( 'Item', 'advanced-ads' ),
+					$item_option_content ); ?>
+                                <?php switch ( $_placement['type'] ) :
+					    case 'post_content' :
+						
+						    ob_start();
+						    include ADVADS_BASE_PATH . 'admin/views/placements-content-index.php';
+						    $option_content = ob_get_clean();
+						
+						    Advanced_Ads_Admin_Options::render_option( 
+							    'placement-content-injection-index', 
+							    __( 'position', 'advanced-ads' ),
+							    $option_content );
+						
+					if( ! function_exists( 'mb_convert_encoding' ) ) : ?>
 					<p><span class="advads-error-message"><?php _e( 'Important Notice', 'advanced-ads' ); ?>: </span><?php _e( 'Your server is missing an extension. This might break the content injection.<br/>Ignore this warning if everything works fine or else ask your hosting provider to enable <em>mbstring</em>.', 'advanced-ads' ); ?></p>
 					   <?php endif;
 										break;
 								endswitch;
 								do_action( 'advanced-ads-placement-options-after', $_placement_slug, $_placement );
 			    ob_start();
+
+					if ( 'header' !== $_placement['type'] ):
+						$_label = isset( $_placement['options']['ad_label'] ) ? $_placement['options']['ad_label'] : 'default';
+						$_position = ! empty( $_placement['options']['placement_position'] ) ? $_placement['options']['placement_position'] : 'default';
+						$_clearfix = ! empty( $_placement['options']['placement_clearfix'] );
+						
+						ob_start();
+						include ADVADS_BASE_PATH . 'admin/views/placements-ad-label.php';
+						if ( ! empty( $placement_types[ $_placement['type']]['options']['show_position'] ) ) :
+							include ADVADS_BASE_PATH . 'admin/views/placements-ad-label-position.php';
+						endif;
+						$option_content = ob_get_clean();
+
+						Advanced_Ads_Admin_Options::render_option( 
+							'placement-ad-label', 
+							__( 'ad label', 'advanced-ads' ),
+							$option_content );
+						
+					endif;
+
 				do_action( 'advanced-ads-placement-options-after-advanced', $_placement_slug, $_placement );
 			    $advanced_options = ob_get_clean();
 			    if( $advanced_options ) :
 				?><a class="advads-toggle-link" onclick="advads_toggle('.advads-placements-advanced-options-<?php
-				echo $_placement_slug; ?>')">- <?php _e( 'advanced options', 'advanced-ads' ); ?> –</a>
+				echo $_placement_slug; ?>')"><?php _e( 'show all options', 'advanced-ads' ); ?></a>
 				<div class="advads-placements-advanced-options-<?php echo $_placement_slug; ?>" style="display: none"><?php
 				    echo $advanced_options;
 				?></div><?php
 			    endif;
+			    // information after options
+			    if( isset( $_placement['type'] ) && 'header' === $_placement['type']) : 
+				?><br/><p><?php printf(__( 'Tutorial: <a href="%s" target="_blank">How to place visible ads in the header of your website</a>.', 'advanced-ads' ), ADVADS_URL . 'place-ads-in-website-header/#utm_source=advanced-ads&utm_medium=link&utm_campaign=header-ad-tutorial' ); ?></p><?php
+			    endif;
+			    
                             ?></td>
                             <?php do_action( 'advanced-ads-placements-list-column', $_placement_slug, $_placement ); ?>
                             <td>
-                                <input type="checkbox" id="adsads-placements-item-delete-<?php echo $_placement_slug; ?>" name="advads[placements][<?php echo $_placement_slug; ?>][delete]" value="1"/>
-                                <label for="adsads-placements-item-delete-<?php echo $_placement_slug; ?>"><?php _ex( 'delete', 'checkbox to remove placement', 'advanced-ads' ); ?></label>
+                                <input type="checkbox" id="advads-placements-item-delete-<?php echo $_placement_slug; ?>" name="advads[placements][<?php echo $_placement_slug; ?>][delete]" value="1"/>
+                                <label for="advads-placements-item-delete-<?php echo $_placement_slug; ?>"><?php _ex( 'delete', 'checkbox to remove placement', 'advanced-ads' ); ?></label>
                             </td>
                         </tr>
     <?php endforeach; ?>
                 </tbody>
             </table>
+            <div class="tablenav bottom">
             <input type="submit" id="advads-save-placements-button" class="button button-primary" value="<?php _e( 'Save Placements', 'advanced-ads' ); ?>"/>
 	    <?php wp_nonce_field( 'advads-placement', 'advads_placement', true ) ?>
 	    <button type="button" title="<?php _e( 'Create a new placement', 'advanced-ads' ); ?>" class="button-secondary" onclick="advads_toggle('.advads-placements-new-form')"><?php
 	    _e( 'New Placement', 'advanced-ads' ); ?></button>
 	    <?php do_action( 'advanced-ads-placements-list-buttons', $placements ); ?>
+	    </div>
         </form>
 	<?php do_action( 'advanced-ads-placements-list-after', $placements );
 endif;

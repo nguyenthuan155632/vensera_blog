@@ -1,7 +1,7 @@
 <?php
-if(! function_exists('is_ecae_premium_exist') && strpos($options['excerpt_method'],'-paragraph')) {
-	$options['excerpt_method'] = 'paragraph';
-}
+// if(! function_exists('is_ecae_premium_exist') && strpos($options['excerpt_method'],'-paragraph')) {
+// 	$options['excerpt_method'] = 'paragraph';
+// }
 
 $excerpt_method_ar = array(
 	'0' => array(
@@ -104,7 +104,7 @@ $yes_no_options = array(
 
 $yes_no_select = array(
 	"name"=>"tonjoo_ecae_options[disable_on_feed]",
-	"description" => __("Disable any excerpt on RSS feed",TONJOO_ECAE),
+	"description" => sprintf(__("Disable any excerpt on RSS feed. Click %shere%s to view your RSS page.",TONJOO_ECAE), '<a href="'. get_bloginfo('rss2_url') .'" target="_blank">', '</a>'),
 	"label" => __("Disable on RSS Feed",TONJOO_ECAE),
 	"value" => $options['disable_on_feed'],
 	"select_array" => $yes_no_options,
@@ -188,7 +188,16 @@ $extra_html_markup = array(
 );
 
 tj_print_select_option($justify_select);
-tj_print_text_option($extra_html_markup);
+
+
+/**
+ * There is are a bug
+ * jika excerpt tidak sampai 2 paragraf maka seluruh html tag di strip
+ * we have no time to fix it
+ * so we disable the kses code (regex.php)
+ * and hide this Extra HTML markup option
+ */
+// tj_print_text_option($extra_html_markup);
 
 
 echo '<tr><td colspan=3><h3 class="meta-subtitle">'.__('Display Image Options',TONJOO_ECAE).'</h3></td></tr>';
@@ -218,7 +227,7 @@ $image_select = array(
 	"label" => __("Content image",TONJOO_ECAE),
 	"value" => $options['show_image'],
 	"select_array" => $yes_no_options,
-	"description" => __("Display Image in excerpt",TONJOO_ECAE) 
+	"description" => __("Display Image in excerpt",TONJOO_ECAE)
 );
 
 echo tj_print_select_option($image_select);
@@ -267,7 +276,8 @@ $image_select = array(
 	"label" => __("Image position",TONJOO_ECAE),
 	"value" => $options['image_position'],
 	"select_array" => $yes_no_options,
-	"description" => __("Image position option",TONJOO_ECAE) 
+	"description" => __("Image position option",TONJOO_ECAE),
+	"premium" => true 
 );
 
 echo tj_print_select_option($image_select);
@@ -277,7 +287,7 @@ echo tj_print_select_option($image_select);
 <tr valign="top">
 	<th><?php _e("Image width",TONJOO_ECAE) ?></th>
 	<td>
-		<input type="radio" name="tonjoo_ecae_options[image_width_type]" value="auto" <?php if($options['image_width_type'] == 'auto') echo 'checked' ?> >
+		<input type="radio" name="tonjoo_ecae_options[image_width_type]" value="auto" <?php echo $disable_premium ?> <?php if($options['image_width_type'] == 'auto') echo 'checked' ?> >
 		Auto
 	</td>
 	<td>&nbsp;</td>
@@ -286,8 +296,8 @@ echo tj_print_select_option($image_select);
 <tr valign="top">
 	<th>&nbsp;</th>
 	<td>
-		<input type="radio" name="tonjoo_ecae_options[image_width_type]" value="manual" <?php if($options['image_width_type'] == 'manual') echo 'checked' ?> >
-		<input type="number" name="tonjoo_ecae_options[image_width]" value="<?php echo $options['image_width'] ?>" style="width: 175px;margin-top: -5px;">
+		<input type="radio" name="tonjoo_ecae_options[image_width_type]" value="manual" <?php echo $disable_premium ?> <?php if($options['image_width_type'] == 'manual') echo 'checked' ?> >
+		<input type="number" name="tonjoo_ecae_options[image_width]" value="<?php echo $options['image_width'] ?>" <?php echo $disable_premium ?> style="width: 175px;margin-top: -5px;">
 	</td>
 	<td>&nbsp;</td>
 </tr>
@@ -296,7 +306,7 @@ echo tj_print_select_option($image_select);
 	<th><?php _e("Image margin",TONJOO_ECAE) ?></th>
 	<td>
 		<p style="padding-top:0px;float:left;"><?php _e("Top",TONJOO_ECAE) ?></p>
-		<input type="number" name="tonjoo_ecae_options[image_padding_top]" value="<?php echo $options['image_padding_top'] ?>" style="float: right;width: 100px;" >
+		<input type="number" name="tonjoo_ecae_options[image_padding_top]" <?php echo $disable_premium ?> value="<?php echo $options['image_padding_top'] ?>" style="float: right;width: 100px;" >
 	</td>
 	<td>px</td>
 </tr>
@@ -305,7 +315,7 @@ echo tj_print_select_option($image_select);
 	<th>&nbsp;</th>
 	<td>
 		<p style="padding-top:0px;float:left;"><?php _e("Right",TONJOO_ECAE) ?></p>
-		<input type="number" name="tonjoo_ecae_options[image_padding_right]" value="<?php echo $options['image_padding_right'] ?>" style="float: right;width: 100px;" >
+		<input type="number" name="tonjoo_ecae_options[image_padding_right]" <?php echo $disable_premium ?> value="<?php echo $options['image_padding_right'] ?>" style="float: right;width: 100px;" >
 	</td>
 	<td>px</td>
 </tr>
@@ -314,7 +324,7 @@ echo tj_print_select_option($image_select);
 	<th>&nbsp;</th>
 	<td>
 		<p style="padding-top:0px;float:left;"><?php _e("Bottom",TONJOO_ECAE) ?></p>
-		<input type="number" name="tonjoo_ecae_options[image_padding_bottom]" value="<?php echo $options['image_padding_bottom'] ?>" style="float: right;width: 100px;" >
+		<input type="number" name="tonjoo_ecae_options[image_padding_bottom]" <?php echo $disable_premium ?> value="<?php echo $options['image_padding_bottom'] ?>" style="float: right;width: 100px;" >
 	</td>
 	<td>px</td>
 </tr>
@@ -323,7 +333,7 @@ echo tj_print_select_option($image_select);
 	<th>&nbsp;</th>
 	<td>
 		<p style="padding-top:0px;float:left;"><?php _e("Left",TONJOO_ECAE) ?></p>
-		<input type="number" name="tonjoo_ecae_options[image_padding_left]" value="<?php echo $options['image_padding_left'] ?>" style="float: right;width: 100px;" >
+		<input type="number" name="tonjoo_ecae_options[image_padding_left]" <?php echo $disable_premium ?> value="<?php echo $options['image_padding_left'] ?>" style="float: right;width: 100px;" >
 	</td>
 	<td>px</td>
 </tr>
@@ -345,7 +355,8 @@ $image_select = array(
 	"description" => "",
 	"label" => __("Image thumbnail size",TONJOO_ECAE),
 	"value" => $options['image_thumbnail_size'],
-	"select_array" => $image_thumbnail_size
+	"select_array" => $image_thumbnail_size,
+	"premium" => true
 );
 
 echo tj_print_select_option($image_select);

@@ -153,13 +153,13 @@ jQuery(document).ready(function($) {
             preview_button(); 
         }
     })
-    $("select[name='tonjoo_ecae_options[excerpt_method]']").on('change',function(){
-        if(ecae_premium_enable == false && $(this).val() != 'paragraph' && $(this).val() != 'word')
-        {
-            alert('The excerpt method below is only enable in premium edition. Please purchase the premium edition to enable this feature \n\n+ Show First Paragraph \n+ Show 1st - 2nd Paragraph \n+ Show 1st - 3rd');
-            $("select[name='tonjoo_ecae_options[excerpt_method]']").val('paragraph');
-        }
-    })
+    // $("select[name='tonjoo_ecae_options[excerpt_method]']").on('change',function(){
+    //     if(ecae_premium_enable == false && $(this).val() != 'paragraph' && $(this).val() != 'word')
+    //     {
+    //         alert('The excerpt method below is only enable in premium edition. Please purchase the premium edition to enable this feature \n\n+ Show First Paragraph \n+ Show 1st - 2nd Paragraph \n+ Show 1st - 3rd');
+    //         $("select[name='tonjoo_ecae_options[excerpt_method]']").val('paragraph');
+    //     }
+    // })
 
     function preview_button()
     {

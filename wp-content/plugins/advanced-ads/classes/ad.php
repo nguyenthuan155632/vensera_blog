@@ -108,6 +108,11 @@ class Advanced_Ads_Ad {
 	public $wrapper = array();
 
 	/**
+	 * Displayed above the ad.
+	 */
+	protected $label = '';
+
+	/**
 	 * init ad object
 	 *
 	 * @param int $id id of the ad (= post id)
@@ -178,16 +183,19 @@ class Advanced_Ads_Ad {
 		$this->description = $this->options( 'description' );
 		$this->output = $this->options( 'output' );
 		$this->status = $_data->post_status;
+		$this->maybe_create_label();
 		$this->wrapper = $this->load_wrapper_options();
 		$this->expiry_date = $this->options( 'expiry_date' );
-
+		
 		// load content based on ad type
 		$this->content = $this->type_obj->load_content( $_data );
 
 		// set wrapper conditions
 		$this->wrapper = apply_filters( 'advanced-ads-set-wrapper', $this->wrapper, $this );
-		// add unique wrapper id, if options given
-		if ( is_array( $this->wrapper ) && $this->wrapper !== array() && ! isset( $this->wrapper['id'] ) ){
+		// add unique wrapper id
+		if ( is_array( $this->wrapper )
+			&& $this->wrapper !== array()
+			&& ! isset( $this->wrapper['id'] ) ){
 			// create unique id if not yet given
 			$this->wrapper['id'] = $this->create_wrapper_id();
 		}
@@ -220,7 +228,7 @@ class Advanced_Ads_Ad {
 				$this->options = Advanced_Ads_Utils::merge_deep_array( array( $this->options, $this->options['change-ad'] ) );
 			}
 		}
-
+		
 		// return specific option
 		if ( $field != '' ) {
 			if ( isset($this->options[$field]) ) {
@@ -294,7 +302,7 @@ class Advanced_Ads_Ad {
 
 		// action when output is created
 		do_action( 'advanced-ads-output', $this, $output, $output_options );
-
+		
 		return apply_filters( 'advanced-ads-output-final', $output, $this, $output_options );
 	}
 
@@ -311,6 +319,11 @@ class Advanced_Ads_Ad {
 		// prevent ad to show up through wp_head, if this is not a header placement
 		if( doing_action( 'wp_head' ) && isset( $this->options['placement_type'] ) && 'header' !== $this->options['placement_type'] ){
 		    return false;
+		}
+
+		// Check If the current ad is requested using a shortcode placed in the content of the current ad.
+		if ( isset( $this->options['shortcode_ad_id'] ) && (int) $this->options['shortcode_ad_id'] === $this->id ) {
+			return false;
 		}
 
 		// force ad display if debug mode is enabled
@@ -440,10 +453,10 @@ class Advanced_Ads_Ad {
 		global $wpdb;
 
 		// remove slashes from content
-		$content = $this->prepare_content_to_save();
+		$this->content = $this->prepare_content_to_save();
 
 		$where = array('ID' => $this->id);
-		$wpdb->update( $wpdb->posts, array( 'post_content' => $content ), $where );
+		$wpdb->update( $wpdb->posts, array( 'post_content' => $this->content ), $where );
 
 		// clean post from object cache
 		clean_post_cache( $this->id );
@@ -462,7 +475,7 @@ class Advanced_Ads_Ad {
 		$options['conditions'] = $conditions;
 		$options['expiry_date'] = $this->expiry_date;
 		$options['description'] = $this->description;
-
+		
 		// filter to manipulate options or add more to be saved
 		$options = apply_filters( 'advanced-ads-save-options', $options, $this );
 
@@ -528,7 +541,9 @@ class Advanced_Ads_Ad {
 		// filter to manipulate the output before the wrapper is added
 		$output = apply_filters( 'advanced-ads-output-inside-wrapper', $output, $this );
 
-		$output = $this->maybe_add_label ( $output );
+		if ( $this->label ) {
+			$output = $this->label . $output;
+		}
 
 		// build wrapper around the ad
 		$output = $this->add_wrapper( $output );
@@ -651,27 +666,41 @@ class Advanced_Ads_Ad {
 
 		//  print_r($this->output);
 
-		if ( ! empty($this->output['position']) ) {
-			switch ( $this->output['position'] ) {
-				case 'left' :
-					$wrapper['style']['float'] = 'left';
-					break;
-				case 'right' :
-					$wrapper['style']['float'] = 'right';
-					break;
-				case 'center' :
-					$wrapper['style']['text-align'] = 'center';
-					// add css rule after wrapper to center the ad
-					// add_filter( 'advanced-ads-output-wrapper-after-content', array( $this, 'center_ad_content' ), 10, 2 );
-					break;
-				case 'clearfix' :
-					$wrapper['style']['clear'] = 'both';
-					break;
+		$position = ! empty( $this->output['position'] ) ? $this->output['position'] : ''; 
+		$use_placement_pos = false;
+
+		if ( ! isset( $this->args['previous_method'] ) || 'group' !== $this->args['previous_method'] ) {
+			if ( isset($this->output['class'] ) && is_array( $this->output['class'] ) ) {
+				$wrapper['class'] = $this->output['class'];
+			}
+
+			if ( ! empty( $this->args['placement_position'] ) ) {
+				$use_placement_pos = true;
+				$position = $this->args['placement_position'];
 			}
 		}
 
-		if ( isset($this->output['class']) && is_array( $this->output['class'] ) ) {
-			$wrapper['class'] = $this->output['class'];
+		switch ( $position ) {
+			case 'left' :
+				$wrapper['style']['float'] = 'left';
+				break;
+			case 'right' :
+				$wrapper['style']['float'] = 'right';
+				break;
+			case 'center' :
+				if ( ! empty ( $this->output['add_wrapper_sizes'] ) && ! $use_placement_pos ) {
+					$wrapper['style']['margin-left'] = 'auto';
+					$wrapper['style']['margin-right'] = 'auto';
+				} else {
+					$wrapper['style']['text-align'] = 'center';
+				}
+
+				// add css rule after wrapper to center the ad
+				// add_filter( 'advanced-ads-output-wrapper-after-content', array( $this, 'center_ad_content' ), 10, 2 );
+				break;
+			case 'clearfix' :
+				$wrapper['style']['clear'] = 'both';
+				break;
 		}
 
 		// add manual classes
@@ -701,11 +730,6 @@ class Advanced_Ads_Ad {
 			$wrapper['style']['height'] = intval( $this->height ) . 'px';
 		}
 
-		// exclude the 'Header Code' placement type
-		if ( ! isset( $this->args['placement_type'] ) || 'header' !== $this->args['placement_type'] ) {
-			$wrapper['data-id'] = $this->id;
-		}
-
 		return $wrapper;
 	}
 
@@ -717,7 +741,6 @@ class Advanced_Ads_Ad {
 	 * @return str $wrapper ad within the wrapper
 	 */
 	protected function add_wrapper($ad_content = ''){
-
 		$wrapper_options = apply_filters( 'advanced-ads-output-wrapper-options', $this->wrapper, $this );
 
 		if ( ( ! isset( $this->output['wrapper-id'] ) || '' === $this->output['wrapper-id'] )
@@ -729,26 +752,7 @@ class Advanced_Ads_Ad {
 		}
 		
 		// build the box
-		$wrapper = '<div';
-		foreach ( $wrapper_options as $_html_attr => $_values ){
-			if ( $_html_attr == 'style' ){
-				$_style_values_string = '';
-				foreach ( $_values as $_style_attr => $_style_values ){
-					if ( is_array( $_style_values ) ) {
-						$_style_values_string .= $_style_attr . ': ' .implode( ' ', $_style_values ). '; '; }
-					else {
-						$_style_values_string .= $_style_attr . ': ' .$_style_values. '; '; }
-				}
-				$wrapper .= " style=\"$_style_values_string\"";
-			} else {
-				if ( is_array( $_values ) ) {
-					$_values_string = implode( ' ', $_values ); }
-				else {
-					$_values_string = sanitize_title( $_values ); }
-				$wrapper .= " $_html_attr=\"$_values_string\"";
-			}
-		}
-		$wrapper .= '>';
+		$wrapper = '<div' . Advanced_Ads_Utils::build_html_attributes( $wrapper_options ) . '>';
 		$wrapper .= apply_filters( 'advanced-ads-output-wrapper-before-content', '', $this );
 		$wrapper .= $ad_content;
 		$wrapper .= apply_filters( 'advanced-ads-output-wrapper-after-content', '', $this );
@@ -798,30 +802,19 @@ class Advanced_Ads_Ad {
 	}
 
 	/**
-	 * add an "Advertisement" label if conditions are met
-	 *
-	 * @param str $output
-	 * @return str $output
+	 * Create an "Advertisement" label if conditions are met.
 	 */
-	public function maybe_add_label( &$output ) {
-		if ( ! ( isset( $this->args['placement_type'] ) && $this->args['placement_type'] === 'header' ) &&
-			$this->type !== 'group' &&
-			$label = Advanced_Ads::get_instance()->get_label()
-		) {
-			// ignore slider and group with refresh
-			if ( isset( $this->args['group_info']['type'] ) &&
-				$this->args['group_info']['type'] === 'slider' &&
-				! empty( $this->args['group_info']['refresh_enabled'] )
-			) {
-				return $output;
-			}
-			// first ad in a group or single ad without group, and not group output for passive cb
-			if ( empty( $this->args['group_info']['ads_displayed'] ) && empty( $this->args['group_info']['passive_cb'] ) ) {
-				$output = $label . $output;
-			}
-		}
+	public function maybe_create_label() {
+		$placement_state = isset( $this->args['ad_label'] ) ? $this->args['ad_label'] : 'default';
 
-		return $output;
+		if ( ( ! isset( $this->args['placement_type'] ) || $this->args['placement_type'] !== 'header' ) &&
+			$this->type !== 'group' &&
+			$label = Advanced_Ads::get_instance()->get_label( $placement_state )
+		) {
+			$this->label = $label;
+		}
 	}
+
+
 
 }

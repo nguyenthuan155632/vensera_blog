@@ -84,7 +84,7 @@ class Advanced_Ads_Ad_Type_Plain extends Advanced_Ads_Ad_Type_Abstract{
 			}
 		}
 		?>
-	    <label class="label" for="advads-parameters-php"><?php _e( 'Allow PHP' ); ?></label>
+	    <label class="label" for="advads-parameters-php"><?php _e( 'Allow PHP', 'advanced-ads' ); ?></label>
 	    <div>
 	    <input id="advads-parameters-php" type="checkbox" name="advanced_ad[output][allow_php]" value="1" <?php checked( 1, $allow_php ); ?>/><?php _e( 'Execute PHP code (wrapped in <code>&lt;?php ?&gt;</code>)', 'advanced-ads' ); 
 	    ?></div><hr/><?php

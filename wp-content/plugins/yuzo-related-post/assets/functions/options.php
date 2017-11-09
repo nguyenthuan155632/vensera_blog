@@ -24,7 +24,7 @@ class yuzo_related_post_make extends IF_utils2{
 								 'name_plugin_url'=>'yuzo-related-post',
 								 'descripcion'    =>'Gets the related post on your blog with any design characteristics.',
 
-								 'version'        =>'5.12.69',
+								 'version'        =>'5.12.70',
 								 'db_version'     =>'1.4',
 								 'present_version'=>'2.0', // html
 								 'popup_version'  =>array('id'=>'0.155','second_close'=>'6','html'=>''),
@@ -851,7 +851,25 @@ class yuzo_related_post_make extends IF_utils2{
 																				'row'   =>array('a','c')),
 															  ),
 					),
-					
+					/*'f1'=>array(               'title'      => __('Get only ID\'s relateds ',$this->parameter['name_option']), 
+											   'title_large'=> __('',$this->parameter['name_option']), 
+											   'description'=> '',  
+											   'icon'       => '',
+											   'tab'        => 'tab03',
+
+												'options'    => array( 
+																		array(  'title' =>__('',$this->parameter['name_option']),
+																				'help'  =>__('',$this->parameter['name_option']),
+																				'type'  =>'html', 
+																				'html1' =>'',
+																				'html2' =>'You can call the function <code>&lt;?php $ids = get_post_related(); ?&gt;</code><br />
+																						  With this  return only the relational IDs.',
+																				'id'    =>$this->parameter['name_option'].'_'.'yuzo_html_get_only_ids',
+																				'name'  =>$this->parameter['name_option'].'_'.'yuzo_html_get_only_ids',
+																				'class' =>'yuzo_message_html',
+																				'row'   =>array('a','c')),
+															  ),
+					),*/
 					'h'=>array(                'title'      => __('Template',$this->parameter['name_option']), 
 											   'title_large'=> __('',$this->parameter['name_option']), 
 											   'description'=> '',  

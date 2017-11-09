@@ -47,14 +47,31 @@ class Advanced_Ads_Admin_Menu {
 	 */
 	public function add_plugin_admin_menu() {
 
-		// add main menu item with overview page
-		add_menu_page(
-			__( 'Overview', 'advanced-ads' ), 'Advanced Ads', Advanced_Ads_Plugin::user_cap( 'advanced_ads_see_interface'), $this->plugin_slug, array($this, 'display_overview_page'), 'dashicons-chart-line', '58.74'
-		);
-
+		$has_ads = Advanced_Ads::get_number_of_ads();
+	    
+		// use the overview page only when there is an ad already
+		if( $has_ads ){
+			add_menu_page(
+				__( 'Overview', 'advanced-ads' ), 'Advanced Ads', Advanced_Ads_Plugin::user_cap( 'advanced_ads_see_interface'), $this->plugin_slug, array($this, 'display_overview_page'), 'dashicons-chart-line', '58.74'
+			);
+		}
+		// forward Ads link to new-ad page when there is no ad existing yet.
+		// the target to post-new.php needs the extra "new" or any other attribute, since the original add-ad link was removed by CSS using the exact href attribute as a selector
+		$target = ( ! $has_ads ) ? 'post-new.php?post_type=' . Advanced_Ads::POST_TYPE_SLUG . '&new=new' : 'edit.php?post_type=' . Advanced_Ads::POST_TYPE_SLUG;
 		add_submenu_page(
-			$this->plugin_slug, __( 'Ads', 'advanced-ads' ), __( 'Ads', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_edit_ads'), 'edit.php?post_type=' . Advanced_Ads::POST_TYPE_SLUG
+			$this->plugin_slug, __( 'Ads', 'advanced-ads' ), __( 'Ads', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_edit_ads'), $target
 		);
+		
+		// display the main overview page as second item when we don’t have ads yet
+		if( ! $has_ads ){
+			add_menu_page(
+				__( 'Overview', 'advanced-ads' ), 'Advanced Ads', Advanced_Ads_Plugin::user_cap( 'advanced_ads_see_interface'), $this->plugin_slug, array($this, 'display_overview_page'), 'dashicons-chart-line', '58.74'
+			);
+
+			add_submenu_page(
+				$this->plugin_slug, __( 'Overview', 'advanced-ads' ), __( 'Overview', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_see_interface'), $this->plugin_slug, array($this, 'display_overview_page')
+			);
+		}
 
 		// hidden by css; not placed in 'options.php' in order to highlight the correct item, see the 'highlight_menu_item()'
 		if ( ! current_user_can( 'edit_posts' ) ) {
@@ -64,7 +81,7 @@ class Advanced_Ads_Admin_Menu {
 		}
 
 		$this->ad_group_hook_suffix = add_submenu_page(
-			$this->plugin_slug, __( 'Ad Groups', 'advanced-ads' ), __( 'Groups', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_edit_ads'), $this->plugin_slug . '-groups', array($this, 'ad_group_admin_page')
+			$this->plugin_slug, __( 'Ad Groups & Rotations', 'advanced-ads' ), __( 'Groups & Rotation', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_edit_ads'), $this->plugin_slug . '-groups', array($this, 'ad_group_admin_page')
 		);
 
 		// add placements page
@@ -74,13 +91,6 @@ class Advanced_Ads_Admin_Menu {
 		// add settings page
 		Advanced_Ads_Admin::get_instance()->plugin_screen_hook_suffix = add_submenu_page(
 			$this->plugin_slug, __( 'Advanced Ads Settings', 'advanced-ads' ), __( 'Settings', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_manage_options'), $this->plugin_slug . '-settings', array($this, 'display_plugin_settings_page')
-		);
-		add_submenu_page(
-			'options.php', __( 'Advanced Ads Debugging', 'advanced-ads' ), __( 'Debug', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_manage_options'), $this->plugin_slug . '-debug', array($this, 'display_plugin_debug_page')
-		);
-		// intro page
-		add_submenu_page(
-			'options.php', __( 'Advanced Ads Intro', 'advanced-ads' ), __( 'Advanced Ads Intro', 'advanced-ads' ), Advanced_Ads_Plugin::user_cap( 'advanced_ads_manage_options'), $this->plugin_slug . '-intro', array($this, 'display_plugin_intro_page')
 		);
 		// add support page
 		add_submenu_page(
@@ -110,14 +120,6 @@ class Advanced_Ads_Admin_Menu {
 	 */
 	public function display_overview_page() {
 
-		$screen = get_current_screen();
-
-		// set up overview widgets
-		Advanced_Ads_Overview_Widgets_Callbacks::setup_overview_widgets( $screen );
-
-		// convert from vertical order to horizontal
-		$screen->add_option( 'layout_columns', 1 );
-
 		include ADVADS_BASE_PATH . 'admin/views/overview.php';
 	}
 
@@ -143,34 +145,6 @@ class Advanced_Ads_Admin_Menu {
 
 		// display view
 		include ADVADS_BASE_PATH . 'admin/views/placements.php';
-	}
-
-	/**
-	 * Render the debug page
-	 *
-	 * @since    1.0.1
-	 */
-	public function display_plugin_debug_page() {
-		// load array with ads by condition
-		$plugin = Advanced_Ads::get_instance();
-		$plugin_options = $plugin->options();
-		$ad_placements = Advanced_Ads::get_ad_placements_array(); // -TODO use model
-
-		include ADVADS_BASE_PATH . 'admin/views/debug.php';
-	}
-
-	/**
-	 * Render intro page
-	 *
-	 * @since    1.6.8.2
-	 */
-	public function display_plugin_intro_page() {
-		// load array with ads by condition
-
-		// remove intro message from queue
-		Advanced_Ads_Admin_Notices::get_instance()->remove_from_queue('nl_intro');
-
-		include ADVADS_BASE_PATH . 'admin/views/intro.php';
 	}
 
 	/**

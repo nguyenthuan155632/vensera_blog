@@ -21,6 +21,8 @@ do_action( 'advanced-ads-ad-params-before', $ad, $types ); ?>
     <?php $type = (isset($types[$ad->type])) ? $types[$ad->type] : current( $types );
 	$type->render_parameters( $ad );
 
-	include ADVADS_BASE_PATH . 'admin/views/ad-parameters-size.php'; ?>
-</div>
+	if( 'dummy' !== $ad->type ) :
+		include ADVADS_BASE_PATH . 'admin/views/ad-parameters-size.php'; 
+	endif; 
+?></div>
 <?php do_action( 'advanced-ads-ad-params-after', $ad, $types );

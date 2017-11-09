@@ -48,28 +48,42 @@ class eace_content_regex
                     {
                         //if use word cut technique
                         $overflow = $total_width - $width;
-
-                        $current_lenght =  strlen(wp_kses($text,array()));
-
-                        $overflow = $current_lenght-$overflow;
+                        $current_lenght = strlen(wp_kses($text,array()));
+                        $overflow = $current_lenght - $overflow;
 
                         // $pos = get cut position based on fixed position ($overflow), but without break last word
                         $pos = strpos($text, ' ', $overflow);
-                        $holder_str = substr($text,0,$pos);
+                        $holder_str = substr($text, 0, $pos);
+
+                        // fix unclosed html tags
+                        $holder_str = $this->fix_unclosed_html_tags($holder_str);
 
                         // delete last non alphanumeric character (save the ">", because it's html end markup)
                         $holder_str = preg_replace('/[`!@#$%^&*()_+=\-\[\]\';,.\/{}|":<?~\\\\]$/', '', $holder_str);
+                        
+                        /**
+                         * There is are a bug
+                         * jika excerpt tidak sampai 2 paragraf maka seluruh html tag di strip
+                         * we have no time to fix it
+                         * so we disable this kses
+                         * and hide the Extra HTML markup option (options-page-general.php)
+                         */
+                        // $holder_str = wp_kses($holder_str, array());      
 
-                        $holder_str = wp_kses($holder_str,array());
-
-                        $holder_str  = "<p>{$holder_str}<!-- READ MORE TEXT --></p>";
+                        if(strpos($holder_str, '</p>')) {
+                            $holder_str = str_replace('</p>', '<!-- DOTS --><!-- READ MORE TEXT --></p>', $holder_str);
+                        }
+                        else {
+                            $holder_str = "<p>{$holder_str}<!-- DOTS --><!-- READ MORE TEXT --></p>";
+                        }                        
 
                         $this->holder[0][$this->key] = $holder_str;
                     }
                     else
                     {
                         //if use preserve paragraph technique
-                        $this->holder[0][$this->key]  = "{$this->holder[0][$this->key]}<!-- READ MORE TEXT -->";
+                        $temp_holder = $this->remove_outer_html_tag($this->holder[0][$this->key]);
+                        $this->holder[0][$this->key]  = "<p>{$temp_holder}<!-- DOTS --><!-- READ MORE TEXT --></p>";
                     }
 
                     //strip the text
@@ -81,6 +95,20 @@ class eace_content_regex
 
             $this->key = $this->key + 1;
         }
+    }
+
+    function fix_unclosed_html_tags($string) {
+        if(trim($string) == '') return '';
+
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML(mb_convert_encoding($string, 'HTML-ENTITIES', 'UTF-8'));
+        
+        return $dom->saveHTML($dom->getElementsByTagName('div')->item(0));
+    }
+
+    function remove_outer_html_tag($string) {
+        return preg_replace('/^<[^>]+>|<\/[^>]+>$/', '', $string);
     }
 
     function restore(&$content, $maximal = false)

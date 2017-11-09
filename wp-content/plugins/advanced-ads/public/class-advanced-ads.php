@@ -75,7 +75,7 @@ class Advanced_Ads {
 	 * @since 1.4.9
 	 * @var array list of bots
 	 */
-	protected $bots = array('008','ABACHOBot','Accoona-AI-Agent','AddSugarSpiderBot','ADmantX','AhrefsBot','alexa','AnyApexBot','appie','Apple-PubSub','Arachmo','Ask Jeeves','avira.com','B-l-i-t-z-B-O-T','Baiduspider','BecomeBot','BeslistBot','BillyBobBot','Bimbot','Bingbot','BLEXBot','BlitzBOT','boitho.com-dc','boitho.com-robot','bot','btbot','CatchBot','Cerberian Drtrs','Charlotte','ConveraCrawler','cosmos','Covario IDS','crawler','CrystalSemanticsBot','curl','DataparkSearch','DiamondBot','Discobot','Dotbot','EmeraldShield.com WebBot','envolk[ITS]spider','EsperanzaBot','Exabot','expo9','facebookexternalhit','FAST Enterprise Crawler','FAST-WebCrawler','FDSE robot','Feedfetcher-Google','FindLinks','Firefly','froogle','FurlBot','FyberSpider','g2crawler','Gaisbot','GalaxyBot','genieBot','Genieo','Gigabot','Girafabot','Googlebot','Googlebot-Image','GrapeshotCrawler','GurujiBot','HappyFunBot','heritrix','hl_ftien_spider','Holmes','htdig','https://developers.google.com','ia_archiver','iaskspider','iCCrawler','ichiro','igdeSpyder','InfoSeek','inktomi','IRLbot','IssueCrawler','Jaxified Bot','Jyxobot','KoepaBot','Kraken','L.webis','LapozzBot','Larbin','LDSpider','LexxeBot','Linguee','Bot','LinkWalker','lmspider','looksmart','lwp-trivial','mabontland','magpie-crawler','Mail.RU_Bot','MaxPointCrawler','Mediapartners-Google','MJ12bot','Mnogosearch','mogimogi','MojeekBot','Moreoverbot','Morning Paper','msnbot','MSRBot','MVAClient','mxbot','NationalDirectory','NetResearchServer','NetSeer Crawler','NewsGator','NG-Search','nicebot','noxtrumbot','Nusearch','Spider','Nutch crawler','NutchCVS','Nymesis','obot','oegp','omgilibot','OmniExplorer_Bot','OOZBOT','Orbiter','PageBitesHyperBot','Peew','polybot','Pompos','PostPost','proximic','Psbot','PycURL','Qseero','rabaz','Radian6','RAMPyBot','Rankivabot','RufusBot','SandCrawler','savetheworldheritage','SBIder','Scooter','ScoutJet','Scrubby','SearchSight','Seekbot','semanticdiscovery','Sensis','Web Crawler','SEOChat::Bot','SeznamBot','Shim-Crawler','ShopWiki','Shoula robot','silk','Sitebot','Snappy','sogou spider','Sogou web spider','Sosospider','Spade','Speedy Spider','Sqworm','StackRambler','suggybot','SurveyBot','SynooBot','TechnoratiSnoop','TECNOSEEK','Teoma','TerrawizBot','TheSuBot','Thumbnail.CZ','robot','TinEye','truwoGPS','TurnitinBot','TweetedTimes Bot','TwengaBot','updated','URL_Spider_SQL','Urlfilebot','Vagabondo','VoilaBot','voltron','Vortex','voyager','VYU2','WebAlta Crawler','WebBug','webcollage','WebFindBot','WebIndex','Websquash.com','WeSEE:Ads','wf84','Wget','WoFindeIch Robot','WomlpeFactory','WordPress','Xaldon_WebSpider','yacy','Yahoo! Slurp','Yahoo! Slurp China','YahooSeeker','YahooSeeker-Testing','YandexBot','YandexImages','Yasaklibot','Yeti','YodaoBot','yoogliFetchAgent','YoudaoBot','Zao','Zealbot','zspider','ZyBorg');
+	protected $bots = array('bot','spider','crawler','scraper','parser','008','Accoona-AI-Agent','ADmantX','alexa','appie','Apple-PubSub','Arachmo','Ask Jeeves','avira\.com','B-l-i-t-z-B-O-T','boitho\.com-dc','BUbiNG','Cerberian Drtrs','Charlotte','cosmos','Covario IDS','curl','DataparkSearch','DDG-Android','expo9','facebookexternalhit','Feedfetcher-Google','FindLinks','Firefly','froogle','Genieo','heritrix','Holmes','htdig','https://developers\.google\.com','ia_archiver','ichiro','igdeSpyder','InfoSeek','inktomi','Kraken','L\.webis','Larbin','Linguee','LinkWalker','looksmart','lwp-trivial','mabontland','Mediapartners-Google','Mnogosearch','mogimogi','Morning Paper','MVAClient','NationalDirectory','NetResearchServer','NewsGator','NG-Search','Nusearch','NutchCVS','Nymesis','oegp','Orbiter','Peew','Pompos','PostPost','proximic','PycURL','Qseero','rabaz','Radian6','Reeder', 'savetheworldheritage','SBIder','Scooter','ScoutJet','Scrubby','SearchSight','semanticdiscovery','Sensis','ShopWiki','silk','Snappy','Spade','Sqworm','StackRambler','TechnoratiSnoop','TECNOSEEK','Teoma','Thumbnail\.CZ','TinEye','truwoGPS','updated','Vagabondo','voltron','Vortex','voyager','VYU2','WebBug','webcollage','WebIndex','Websquash\.com','WeSEE:Ads','wf84','Wget','WomlpeFactory','WordPress','yacy','Yahoo! Slurp','Yahoo! Slurp China','YahooSeeker','YahooSeeker-Testing','YandexImages','Yeti','yoogliFetchAgent','Zao','ZyBorg','okhttp','ips-agent','ltx71','Optimizer','Daum','Qwantify');
 
 	/**
 	 *
@@ -298,6 +298,7 @@ class Advanced_Ads {
 	 */
 	function setup_default_ad_types($types){
 		$types['plain'] = new Advanced_Ads_Ad_Type_Plain(); /* plain text and php code */
+		$types['dummy'] = new Advanced_Ads_Ad_Type_Dummy(); /* dummy ad */    
 		$types['content'] = new Advanced_Ads_Ad_Type_Content(); /* rich content editor */
 		$types['image'] = new Advanced_Ads_Ad_Type_Image(); /* image ads */
 		$types['group'] = new Advanced_Ads_Ad_Type_Group(); /* group ad */
@@ -392,7 +393,7 @@ class Advanced_Ads {
 		// check if admin allows injection in all places
 		if( ! isset( $options['content-injection-everywhere'] ) ){
                     // check if this is a singular page within the loop or an amp page
-                    $is_amp = function_exists( 'advanced_ads_is_amp' ) && advanced_ads_is_amp();
+                    $is_amp = advads_is_amp();
                     if ( ( ! is_singular( $public_post_types ) && ! is_feed() ) || ( ! $is_amp && ! in_the_loop() ) ) { return $content; }
 		} else {
                     global $wp_query;
@@ -524,9 +525,16 @@ class Advanced_Ads {
 	 * @return bool true if the current user agent is empty or a bot
 	 */
 	public function is_bot(){
+		// show ads on AMP version also for bots in order to allow Google (and maybe others) to cache the page
+		if ( advads_is_amp() ) {
+			return false;
+		}
+
+
 		$bots = apply_filters('advanced-ads-bots', $this->bots);
+
 		$bots = implode('|', $bots);
-		$bots = preg_replace('@[^-_;/|\][ a-z0-9]@i', '', $bots);
+		$bots = preg_replace('@[^-_;/|\][ :.!a-z0-9]@i', '', $bots);
 		$regex = "@$bots@i";
 
 		if(isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] !== '') {
@@ -569,7 +577,7 @@ class Advanced_Ads {
 	 */
 	protected function get_group_taxonomy_params(){
 		$labels = array(
-			'name'              => _x( 'Ad Groups', 'ad group general name', 'advanced-ads' ),
+			'name'              => _x( 'Ad Groups & Rotations', 'ad group general name', 'advanced-ads' ),
 			'singular_name'     => _x( 'Ad Group', 'ad group singular name', 'advanced-ads' ),
 			'search_items'      => __( 'Search Ad Groups', 'advanced-ads' ),
 			'all_items'         => __( 'All Ad Groups', 'advanced-ads' ),
@@ -729,17 +737,33 @@ class Advanced_Ads {
 	/**
 	 * get an "Advertisement" label to use before single ad or before first ad in a group
 	 *
-	 * @return string label, bool false if label should not be displayed
+	 * @param string $placement_state default/enabled/disabled
+	 * @return string label, empty string if label should not be displayed
 	 */
-	public function get_label() {
+	public function get_label( $placement_state = 'default' ) {
+		if ( $placement_state === 'disabled' ) {
+			return '';
+		}
+
 		$advads_options = Advanced_Ads::get_instance()->options();
 
-		if ( isset( $advads_options['custom-label']['enabled'] ) ) {
-			$label = ! empty( $advads_options['custom-label']['text'] ) ? esc_html( $advads_options['custom-label']['text'] ) : _x( 'Advertisements', 'label above ads', 'advanced-ads' );
-
-			$template = sprintf( '<div class="%s">%s</div>', Advanced_Ads_Plugin::get_instance()->get_frontend_prefix() . 'adlabel', $label );
-			return apply_filters( 'advanced-ads-custom-label', $template, $label );
+		if ( $placement_state !== 'enabled' && empty( $advads_options['custom-label']['enabled'] ) ) {
+			return '';
 		}
-		return false;
+
+		$label = ! empty( $advads_options['custom-label']['text'] ) ? esc_html( $advads_options['custom-label']['text'] ) : _x( 'Advertisements', 'label above ads', 'advanced-ads' );
+
+		$template = sprintf( '<div class="%s">%s</div>', Advanced_Ads_Plugin::get_instance()->get_frontend_prefix() . 'adlabel', $label );
+		return apply_filters( 'advanced-ads-custom-label', $template, $label );
+	}
+	
+	/**
+	 * retrieve the number of ads in any status except trash
+	 */
+	public static function get_number_of_ads(){
+		$args = array( 'post_status' => 'any' );
+		$recent_ads = self::get_instance()->get_model()->get_ads( $args );
+		
+		return count( $recent_ads );
 	}
 }

@@ -1,8 +1,8 @@
 === Easy Custom Auto Excerpt ===
-Contributors: Todi.Adiatmo, haristonjoo, Alzea
+Contributors: Todi.Adiatmo, haristonjoo, Alzea, ageproem
 Tags: excerpt, home, search, archive, automatic, auto, justify
 Requires at least: 3.5
-Tested up to: 4.7
+Tested up to: 4.8
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -11,6 +11,8 @@ Auto Excerpt for your post on home, search and archive. Customize Read More butt
 == Description ==
 
 Easy Custom Auto Excerpt is wordpress plugin to cut/excerpt your post displayed on the home , search or archive pages. This plugin also enable you to customize the readmore button text and thumbnail image. Just active the plugin, configure some options and you're good to go :)
+
+[youtube http://www.youtube.com/watch?v=ZZaXfrB4-68]
 
 The free version is come with everything you need to auto excerpt your content.
 
@@ -25,10 +27,11 @@ The free version is come with everything you need to auto excerpt your content.
 * Preserve Image on Excerpt.
 * Preserve real excerpt you wrote.
 * Partial Indonesia and Spanish translation.
+* Enable excerpt on RSS feed.
+* Excerpt method by 1st paragraph, 2nd paragraph, and 3rd paragraph
 
 And if you like our plugin and want to do more customization we offer the premium version with some added feature :
 
-* Excerpt method by 1st paragraph, 2nd paragraph, and 3rd paragraph
 * Adjust Image Excerpt Position (left, right, center, float left and float right)
 * Adjust Image width and margin
 * Disable excerpt on specific post
@@ -94,6 +97,23 @@ It will used, instead of the automatically generated one.
 4. Read More Button Options.
 
 == Changelog ==
+
+= 2.4.5 =
+* Bugfix unicode HTML-ENTITIES and UTF-8
+
+= 2.4.4 =
+* Excerpt method by 1st paragraph now available on FREE version!
+* Excerpt method by 2nd paragraph now available on FREE version!
+* Excerpt method by 3rd paragraph now available on FREE version!
+* Fixed various bugs
+
+= 2.4.3 =
+* Bugfix unicode utf8 chars
+
+= 2.4.2 =
+* Added feature: add dots ([...]) at the end of the excerpt
+* Fixed various bugs
+* Updated compability for WordPress 4.8
 
 = 2.4.1 =
 * Fixed manual excerpt bug

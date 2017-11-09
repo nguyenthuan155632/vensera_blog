@@ -2,77 +2,68 @@
 Contributors: webzunft
 Donate link:https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5RRRCEBGN3UT2
 Tags: ads, ad, ad inserter, ad injection, ad manager, ads manager, ad widget, adrotate, adsense, advertise, advertisements, advertising, adverts, advert, amazon, banner, banners, buysellads, chitika, clickbank, dfp, doubleclick, geotarget, geolocation, geo location, google dfp, monetization, widget
-Requires at least: WP 4.2, PHP 5.3
-Tested up to: 4.7.3
-Stable tag: 1.7.21
+Requires at least: 4.6
+Tested up to: 4.8
+Requires PHP: 5.2
+Stable tag: 1.8.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Manage and optimize your ads and ads performance with support for AdSense, ad injection, ad widget, and ad rotation.
+Manage and optimize your ads and increase your revenue. Support for all ad codes, AdSense, ad injection, ad widget, and ad rotation.
 
 == Description ==
 
-Advanced Ads is a simple ad manager made by a publisher for publishers. Based on my experience delivering millions of ads per month I built this advertising plugin as a powerful, but light weight solution to not only manage and insert banners in WordPress, but to test and optimize them as well.
+Are you looking for an ad manager plugin? These are the top arguments to use Advanced Ads:
+
+* most features to test and optimize ads
+* unlimited ad units
+* works with all ad types and networks
+* the only solution with *Ad Health* integration and AdSense violation checks
+* [best rated](https://wordpress.org/support/plugin/advanced-ads/reviews/?filter=5) and free email support
+
+I built Advanced Ads based on my experience delivering millions of ads per month.
 
 [Full Feature List](https://wpadvancedads.com/features/).
 
 = create and manage ads =
 
-* create a banner is as easy as creating a post
-* group ads to create ad rotations
-* create drafts of advertisements only visible to logged in users
-* set a date for when to publish the ad
-* sell ads on your website with the [Selling Ads add-on](https://wpadvancedads.com/add-ons/selling-ads/)
-* import / export ads and settings
-* wizard to quickly create and place simple ads
+* create and display **unlimited** ad units
+* rotate ads
+* schedule ads and set expiry date
+* target ads by content and user groups
+* inject ads into posts and pages automatically without coding
+* sell ads on your website automatically with the [Selling Ads add-on](https://wpadvancedads.com/add-ons/selling-ads/)
 
 = ad types =
 
 choose between different ad types that enable you to:
 
-* insert code for ad and affiliate networks (e.g., AdSense, Chitika, Amazon, BuySellAds, DoubleClick)
-* dedicated support for all types of Google AdSense banners
+* insert code for any ad and affiliate networks (e.g., AdSense, Chitika, Amazon, BuySellAds, DoubleClick, media.net, … )
+* dedicated support for all types of Google AdSense banners, including Responsive, InFeed and InArticle ads
 * display images and image banners
+* create content-rich ads with the WordPress TinyMCE editor
 * use shortcodes within ads (to also deliver advertisements from other ad plugins like AdRotate or Simple Ads Manager)
-* create content rich ads with the tinymc editor
-* use flash file advertisements including a fallback – included in [Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/)
-* ad group to allow ads from the same group to share conditions and settings
 
 = display ads =
 
-* auto inject banner (see _ad injection_ below)
-* display advertising in template files (with functions)
-* display advertising in post content (with shortcodes)
-* ad widget for sidebars and widget areas
-* display ad groups based on customizable ad weight
-* use placements in your theme to insert ads and ad groups in template files without coding
-* disable all ads on individual single pages
-* set start time and expiry date for advertising
-* display multiple ads from a banner group (ad blocks)
-* define the order of ads from an ad group and allow default ads
-* display a label, e.g. “Advertisements” above each ad
-* compatible with site builders: SiteOrigin
+* use functions to display ads in template files
+* use shortcodes to place them manually in post content
+* show ads in sidebars and widget areas
+* disable all ads on specific pages
+* display multiple ads (ad blocks)
+* display a customizable label, e.g., “Advertisements” above each ad
 
 = display conditions =
 
 show ads based on conditions like
 
-* individual posts, pages and other post type
-* post type
-* posts by category, tags, taxonomies
-* author
+* individual posts, pages, and other post types
+* posts by category, tags, taxonomies, author, and age
 * archive pages by category, tags, taxonomies
 * special page types like 404, attachment and front page
-* hide ads on secondary queries (e.g. posts in sidebars)
+* hide ads on secondary queries (e.g., posts in sidebars)
 * display or hide banners within the post feed
-
-global conditions:
-
-* disable all ads in the frontend (e.g. when your ad network breaks down)
-* disable all ads on 404 pages (e.g. recommended for AdSense)
-* disable all ads on non-singular pages
-* disable all ads in secondary queries
-* disable all ads in the feed
+* hide all ads from specific page types, e.g., 404 pages, feed
 * hide ads from bots and web crawlers
 
 = visitor conditions =
@@ -80,55 +71,45 @@ global conditions:
 display ads by conditions based on the visitor. [List of all visitor conditions](https://wpadvancedads.com/manual/visitor-conditions/)
 
 * display or hide a banner by device: mobile and tablet or desktop
-* display or hide a banner for logged in visitors
-* hide advertising from logged in users based on their role
-* advanced visitor conditions: previous visited url (referrer), user capability, browser language, browser and device, url parameters included in [Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/)
-* display ads by geo location with the [Geo Targeting add-on](https://wpadvancedads.com/add-ons/geo-targeting/)
+* display or hide a banner by role and for logged in visitors
+* advanced visitor conditions: previously visited URL (referrer), user capability, browser language, browser and device, URL parameters included in [Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/)
+* display ads by geolocation with the [Geo Targeting add-on](https://wpadvancedads.com/add-ons/geo-targeting/)
 * display ads by browser width with the [Responsive add-on](https://wpadvancedads.com/add-ons/responsive-ads/)
 
 = ad injection | placements =
 
 Placements to insert ads in pre-defined positions in your theme and content. [List of all placements](https://wpadvancedads.com/manual/placements/)
 
-* ads after any given paragraph or headline in the post content
-* ads at the top of the post content
-* ads at the bottom of the post content
+* ads after any given paragraph or headline
+* ads at the top or bottom of the post content
 * ads before closing `</head>` tag
-* ads page footer
+* ads in the footer
 * test placements against each other with [Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/)
-* many more ad inserters with [add-ons](https://wpadvancedads.com/add-ons/)
+* many more ad positions with [add-ons](https://wpadvancedads.com/add-ons/)
 
-= ad networks =
-
-The Advanced Ads ad manager is compatible with all ad networks and banners from affiliate programs like Google AdSense, Chitika, Clickbank, Amazon, and also Google DoubleClick (DFP).
-You can also use it to insert additional ad network tags into header or footer of your site without additional coding.
-
-= best support for mobile devices =
+= mobile devices =
 
 * display ads for mobile and tablets or desktop only
-* display responsive image ads (WordPress 4.4 and later)
+* display responsive image ads
 * ads for specific browser sizes only using [Responsive Ads](https://wpadvancedads.com/add-ons/responsive-ads/)
 * insert ads on AMP pages with [Responsive Ads](https://wpadvancedads.com/add-ons/responsive-ads/)
 
 = Google AdSense =
 
-* supports all ad units, including display ads, link units, and matched content
-* switch sizes of an ad
-* switch between normal and responsive ads
-* optional limit to 3 AdSense banners according to AdSense terms of service
+* supports all ad units, including display ads, link units, InFeed, InArticle, and matched content
+* change type and sizes of an ad without going into your AdSense account
+* optional limit to 3 AdSense banners
 * hide AdSense advertisements on 404 pages by default (to comply with AdSense terms)
-* insert Page-Level ads code globally
+* insert AdSense verification, Page-Level ads and QuickStart code
+* Ad Health integration and AdSense violation checks
+* option to make the AdSense background transparent
 * assistant for exact sizes of responsive ads with the [Responsive add-on](https://wpadvancedads.com/add-ons/responsive-ads/)
 
 = ad blocker =
 
-* basic features to prevent ad blocks from being removed by AdBlock and co
+* basic features to prevent ad blocks from being removed by AdBlock and others
 * prevent ad blockers from breaking sites where plugin scripts are running
-
-= based on WordPress standards =
-
-* integrated into WordPress using standards like custom post types, taxonomies and hooks
-* easily customizable by any WordPress plugin developer
+* show alternative content to ad block users with [Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/)
 
 Learn more on the [plugin homepage](https://wpadvancedads.com).
 
@@ -136,7 +117,7 @@ Localizations: English, German, French, Spanish, Dutch, Italian, Portuguese, Vie
 
 > <strong>Add-Ons</strong>
 >
-> * [Advanced Ads Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/) – powerful tools for ad optimizations: cache-busting, more placements, etc.
+> * [Advanced Ads Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/) – powerful tools for ad optimizations: cache-busting, more placements, lazy load, ad blocker module, click fraud, and more
 > * [Selling Ads](https://wpadvancedads.com/add-ons/selling-ads/) - allows you to sell ads on your website fully automated, including payments and advertiser profiles.
 > * [Geo Targeting](https://wpadvancedads.com/add-ons/geo-targeting/) – display ads based on geo location of the visitor
 > * [Tracking](https://wpadvancedads.com/add-ons/tracking/) – ad tracking and statistics
@@ -173,13 +154,23 @@ How to install the plugin and get it working?
 3. Upload the `advanced-ads` directory to the `/wp-content/plugins/` directory
 4. Activate Advanced Ads in the Plugin dashboard
 
-== Displaying Ads ==
+== Frequently Asked Questions ==
+
+= Which ad networks are supported? =
+
+Advanced Ads is compatible with all ad networks and banners from affiliate programs like Google AdSense, Chitika, Clickbank, Amazon, and also Google Double Click (DFP), media.net.
+
+You can also use it to insert additional ad network tags into header or footer of your site without coding.
+
+AdSense has even a dedicated ad type leveling the specific options this ad network provides.
+
+= PHP functions and shortcodes =
 
 You can use functions and shortcodes to display ads and ad groups.
 
 The integers in this example are the IDs of the elements.
 
-Use these shortcode to insert an ad or ad group into your post/page.
+Use these shortcodes to insert an ad or group into your post/page.
 
 `[the_ad id="24"]`
 `[the_ad_group id="5"]`
@@ -194,11 +185,39 @@ In addition to directly displaying ads and groups you can define ad placements a
 `[the_ad_placement id="header-left"]`
 `<?php the_ad_placement('header-left'); ?>`
 
-== Frequently Asked Questions ==
-
 = Is there a revenue share? =
 
 There is no revenue share. Advanced Ads doesn’t alter your ad codes in a way that you earn less than you would directly including the ad code in your template.
+
+= Can I place ads directly in my theme files? =
+
+Yes. I would add a "Manual" placement into your theme files. It would allow you to change the displayed ads or groups later without changing your code again.
+
+= Does it work with other ad plugins? =
+
+Yes. Advanced Ads can be combined with other ad plugins. 
+Just use their shortcodes in our "Rich Media" ad type to combine both features.
+Works with AdRotate, Ad Inserter, Ad Injection, Quick AdSense, QuickAdSense Reloaded (WPQUADS), Simple Ads Manager, and other plugins.
+
+= Can I use Flash ads? =
+
+There is a dedicated Flash ad type in [Pro](https://wpadvancedads.com/add-ons/advanced-ads-pro/).
+
+= Is the plugin compatible with site builders? =
+
+Yes. It works out of the box with all site builders that allow shortcodes or widgets, like SiteOrigin, Beaver Builder, Visual Composer, and others.
+There is also a [free add-on to support Visual Composer](https://wordpress.org/plugins/ads-for-visual-composer/).
+
+= Will ads show up for ad block users? =
+
+Visitors who have any ad blocker (e.g., AdBlock Plus) enabled won’t see ads from known external sources (e.g., AdSense).
+You can still monetize those spots with custom content.
+
+Read more about ad blockers and the features Advanced Ads has to deal with them [on this page](https://wpadvancedads.com/manual/ad-blockers/).
+
+= I am a developer. Can I customize the plugin? =
+
+Yes. Advanced Ads is based on WordPress standards and therefore easily customizable using either WordPress hooks or the ones we defined [here](https://wpadvancedads.com/codex/).
 
 == Screenshots ==
 
@@ -209,6 +228,147 @@ There is no revenue share. Advanced Ads doesn’t alter your ad codes in a way t
 5. Choose from various conditions where and to whom to display your ads.
 
 == Changelog ==
+
+= 1.8.12 =
+
+* linked the new [AdSense In-feed add-on](https://wordpress.org/plugins/advanced-ads-adsense-in-feed/) where needed
+* optimized settings page layout
+* process Advanced Ads shortcodes correctly when they are nested inside Rich Content ads
+
+= 1.8.11 =
+
+* added option to make AdSense background transparent
+* only show missing the_content filter warning if relevant
+* show Ad Health warning if current user looks like a bot
+* fixed showing correct group type options
+
+= 1.8.10 =
+
+* added Ad Health warning if ads are disabled in the frontend
+* fix for Wizard navigation
+
+= 1.8.9 =
+
+* added option to disable AdSense-related Ad-Health warnings
+* fixed search for terms with numbers in them
+* added check for hidden AdSense units
+* added warning that AdSense InFeed and InArticle ads can’t be aligned left or right
+
+= 1.8.8 =
+
+* fix to feedback form
+
+= 1.8.7 =
+
+* added option to analyze the number of visitors using an ad blocker
+* exchanged Dummy ad image and URL to something more neutral
+* compatibility with PHP 5.2
+* use margin: auto to center reserved ad space
+* renamed Groups menu item to also mention "Rotations"
+* do not execute shortcodes of the current ad in its own content
+* updated first-ad video tutorial link
+* fixed wizard skipping a step after being stopped and reopened
+* fixed wrong scheduled time displayed on ad overview list
+
+= 1.8.6 =
+
+* hotfix for PHP below 5.4
+* fixed HTTPS warning showing up for links
+
+= 1.8.5 =
+
+* optimized Wizard – fewer steps and less clutter
+* added more options to the placement box after a new ad is saved
+* load dashboard widget using AJAX
+* show a warning in Ad Health if an ad contains HTTPS, but the site is using HTTP
+* fixed problem when multiple add-ons were updated at once
+
+= 1.8.4 =
+
+* added "Taxonomy" Display Condition
+* display arrow if an Ad Health message is a link
+* removed "jQuery not in Header" warning after we fixed all known issues
+* renamed and updated add-on updater class to use SSL only
+* updated pt_BR translation
+* added Japanese translation
+* replaced "Cheatin' uh?" message with something useful if user role does not have required permissions
+* prevent output of Adsense ads on AMP pages if they are not converted to AMP-format with Responsive add-on
+
+= 1.8.3 =
+
+* introduced `advads_is_amp` function to fix ad injections on AMP pages
+* implemented a simple ad block counter with Google Analytics
+
+= 1.8.2 =
+
+* fixed Content Age condition
+* fixed group options not changing correctly when switching types
+
+= 1.8.1 =
+
+* added support for new AdSense InFeed and InArticle ad codes
+* create a new ad group on group page
+* add group wrapper even if the group was not edited on the group edit page
+* add the 'advanced-ads-output-wrapper-after-content-group' filter
+* removed unused MarketPress license code
+* removed debug page
+* removed license expires notice
+* updated composer
+* updated translation files
+* fixed issue with inheriting settings of ad group ad type
+* removed PHP notice in Import feature
+
+= 1.8 =
+
+This release is even larger under the hood than the following list. Please make sure to also update all [your add-ons](https://wpadvancedads.com/add-ons/) and let us know directly about any issues [here](https://wpadvancedads.com/support/).
+
+* new Content Age display condition added – display ads based on post age
+* allow to enable/disable ad label for each placement
+* complete rework of group and placement options
+* added Dummy ad type
+* show AdSense code form inline instead of in a popup
+* optimized workflow in wizard to show only relevant information
+* select draft, pending and future posts in the Specific Pages condition, too
+* warn if QuickStart ads from AdSense are loaded
+* show ads on AMP pages for all bots
+* properly escaped output of image ad title and alt attribute
+* removed description field from groups since we have never seen this being used, let us know when you need it though
+* updated all translation files
+* fixed wrong month names in translated versions of the ad overview list
+* fixed with small image ads not appearing on AMP pages
+* fixed missing and wrong textdomains
+* fixed search for single digit IDs in Specific Pages condition not working
+
+= 1.7.25 =
+
+* added explicit "link ads" AdSense type with normal and responsive format
+* included link to AdSense types manual
+* optimized bot check
+* removed TinyMCE security features from links added to the rich media ad type to not break affiliate links
+* fixed error appearing when image of an image ad does not exist anymore
+* fixed wizard not going to ad parameters box automatically after selecting ad type
+
+= 1.7.24 =
+
+* fixed issue with shortcode button that caused some page builders and scripts to break
+* fixed saving settings on multisite sub-blogs
+* applied fix to updater class
+* fixed basic fix function needed for Sticky ads
+
+= 1.7.23 =
+
+* fix a warning that appears when wp admin bar is missing.
+
+= 1.7.22 =
+
+* added option to also consider elements in containers for ad content injection
+* show warning in Ad Health bar when not all ads could be injected
+* added logic to display ad specific warnings and possible conflicts
+* added warning to disable shortcode button or ad blocker in order to use the visual editor for posts
+* reapplied user capabilities to create or edit ads to make sure they are never wrong
+* added warning about left and right position not working with responsive AdSense units
+* edited feedback form
+* add ad/group wrapper, if needed
 
 = 1.7.21 =
 
@@ -309,7 +469,9 @@ There is no revenue share. Advanced Ads doesn’t alter your ad codes in a way t
 * extended ad debug mode with more information
 * restructured support page to reach helper more quickly
 * fixed header ad bug
+* fixed compatibility issues with Yoast SEO, WPML, and Jetpack
+* confirmed working with Divi Themes and NewsMag
 
-[Changelog Archive](http://wpadvancedads.com/codex/changelog-archive/)
+[Changelog Archive](https://wpadvancedads.com/codex/changelog-archive/)
 
 == Upgrade Notice ==

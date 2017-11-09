@@ -7,7 +7,7 @@
 			// choose first type if none set
 			$type = (isset($ad->type)) ? $ad->type : current( $types )->ID;
 		foreach ( $types as $_type ) : ?>
-            <li>
+            <li class="advanced-ads-type-list-<?php echo $_type->ID; ?>">
                 <input type="radio" name="advanced_ad[type]"
                        id="advanced-ad-type-<?php echo $_type->ID ?>"
                        value="<?php echo $_type->ID; ?>"

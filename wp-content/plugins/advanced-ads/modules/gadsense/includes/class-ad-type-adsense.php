@@ -84,8 +84,10 @@ class Advanced_Ads_Ad_Type_Adsense extends Advanced_Ads_Ad_Type_Abstract {
 				$content->json = $json_content;
 				$unit_type = $content->unitType;
 				$unit_code = $content->slotId;
+				$layout = isset( $content->layout ) ? $content->layout : '';
+				$layout_key = isset( $content->layout_key ) ? $content->layout_key : '';
 				
-				if ( 'responsive' != $content->unitType && 'matched-content' != $content->unitType ) {
+				if ( 'responsive' != $content->unitType && 'link-responsive' != $content->unitType && 'matched-content' != $content->unitType ) {
 					// Normal ad unit
 					$unit_width = $ad->width;
 					$unit_height = $ad->height;
@@ -176,16 +178,25 @@ class Advanced_Ads_Ad_Type_Adsense extends Advanced_Ads_Ad_Type_Abstract {
 		$output = apply_filters( 'advanced-ads-gadsense-output', false, $ad, $pub_id, $content );
 		if ( $output !== false ) {
 			return $output;
+		} elseif ( advads_is_amp() ) {
+			// Prevent output on AMP pages.
+			return '';
 		}
 
 		$output = '';
 
-		if ( 'responsive' != $content->unitType && 'matched-content' != $content->unitType ) {
+		// build static normal content ads first
+		if ( ! in_array( $content->unitType, array( 'responsive', 'link-responsive', 'matched-content', 'in-article', 'in-feed' ) ) ) {
 			$output .= '<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>' . "\n";
 			$output .= '<ins class="adsbygoogle" ';
 			$output .= 'style="display:inline-block;width:' . $ad->width . 'px;height:' . $ad->height . 'px;" ' . "\n";
 			$output .= 'data-ad-client="ca-' . $pub_id . '" ' . "\n";
-			$output .= 'data-ad-slot="' . $content->slotId . '"></ins> ' . "\n";
+			$output .= 'data-ad-slot="' . $content->slotId . '"';
+			// ad type for static link unit
+			if( 'link' == $content->unitType ){
+			    $output .= "\n" . 'data-ad-format="link"';
+			}
+			$output .= '></ins> ' . "\n";
 			$output .= '<script> ' . "\n";
 			$output .= '(adsbygoogle = window.adsbygoogle || []).push({}); ' . "\n";
 			$output .= '</script>' . "\n";
@@ -214,13 +225,41 @@ class Advanced_Ads_Ad_Type_Adsense extends Advanced_Ads_Ad_Type_Abstract {
 	}
 
 	protected function append_defaut_responsive_content(&$output, $pub_id, $content) {
+		$format = '';
+		$style = 'display:block;';
+		switch( $content->unitType ){
+			case 'matched-content' : 
+			    $format = 'autorelaxed';
+			    break;
+			case 'link-responsive' : 
+			    $format = 'link';
+			    break;
+			case 'in-feed' : 
+			    $format = 'fluid';
+			    $layout = $content->layout;
+			    $layout_key = $content->layout_key;
+			    break;
+			case 'in-article' : 
+			    $format = 'fluid';
+			    $layout = 'in-article';
+			    $style = 'display:block; text-align:center;';
+			    break;
+			case 'link-responsive' : 
+			    $format = 'link';
+			    break;
+			default :
+			    $format = 'auto';
+		}
+			
 		$output .= '<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>' . "\n";
 		$output .= '<ins class="adsbygoogle" ';
-		$output .= 'style="display:block;" ';
+		$output .= 'style="'. $style .'" ';
 		$output .= 'data-ad-client="ca-' . $pub_id . '" ' . "\n";
 		$output .= 'data-ad-slot="' . $content->slotId . '" ' . "\n";
+		$output .= isset( $layout ) ? 'data-ad-layout="' . $layout . '"' . "\n" : '';
+		$output .= isset( $layout_key ) ? 'data-ad-layout-key="' . $layout_key . '"' . "\n" : '';
 		$output .= 'data-ad-format="';
-		$output .= ( 'matched-content' == $content->unitType )? 'autorelaxed' : 'auto';
+		$output .= $format;
 		$output .= '"></ins>' . "\n";
 		$output .= '<script> ' . "\n";
 		$output .= apply_filters( 'advanced-ads-gadsense-responsive-adsbygoogle', '(adsbygoogle = window.adsbygoogle || []).push({}); ' . "\n");

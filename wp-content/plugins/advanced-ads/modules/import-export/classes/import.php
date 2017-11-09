@@ -69,7 +69,8 @@ class Advanced_Ads_Import {
 				break;
 			case 'xml_file':
 				if ( $this->handle_upload() ) {
-					$this->import( file_get_contents( $this->import_id ) );
+					$content = file_get_contents( $this->import_id );
+					$this->import( $content );
 					@unlink( $this->import_id );
 				}
 				break;

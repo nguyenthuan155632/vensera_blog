@@ -14,9 +14,9 @@ class Advanced_Ads_Admin_Licenses {
 
 	private function __construct() {
 		if ( ! defined( 'DOING_AJAX' ) ) {
-			add_action( 'plugins_loaded', array( $this, 'wp_plugins_loaded' ) );
 			add_action( 'load-plugins.php', array( $this, 'check_plugin_licenses' ) );
 		}
+		add_action( 'plugins_loaded', array( $this, 'wp_plugins_loaded' ) );
 		
 		// todo: check if this is loaded late enough and all add-ons are registered already
 		add_filter( 'upgrader_pre_download', array( $this, 'addon_upgrade_filter' ), 10, 3 );		
@@ -155,7 +155,7 @@ class Advanced_Ads_Admin_Licenses {
 			if( isset($errors[ $license_data->error ] ) ) {
 			    return $error;
 			} else {
-			    return sprintf( __('License is invalid. Reason: %s'), $error);
+			    return sprintf( __( 'License is invalid. Reason: %s', 'advanced-ads' ), $error);
 			}
 		    }
 		} else {
@@ -357,7 +357,7 @@ class Advanced_Ads_Admin_Licenses {
          */
         public function add_on_updater(){
 	    
-		// ignore, if not main blog or is ajax
+		// ignore, if not main blog
 		if( ( is_multisite() && ! is_main_site() ) ){
 		    return;
 		}
@@ -409,7 +409,7 @@ class Advanced_Ads_Admin_Licenses {
 				// add_filter( 'expiration_of_transient_' . $transient_key, array( $this, 'set_expiration_of_update_transient' ) );
 				add_filter( 'pre_update_option_' . $transient_key, array( $this, 'set_expiration_of_update_option' ) );
 				
-				new EDD_SL_Plugin_Updater( ADVADS_URL, $_add_on['path'], array(
+				new ADVADS_SL_Plugin_Updater( ADVADS_URL, $_add_on['path'], array(
 					'version' 	=> $_add_on['version'],
 					'license' 	=> $license_key,
 					'item_name' => $_add_on['name'],
@@ -460,7 +460,8 @@ class Advanced_Ads_Admin_Licenses {
 		}
 		
 		if( isset( $plugin_file ) && $plugin_file ){
-		    $updater->strings['downloading_package'] = __( 'Downloading updated version...', 'advanced-ads' );
+		    // hides the download url, but makes debugging harder
+		    // $updater->strings['downloading_package'] = __( 'Downloading updated version...', 'advanced-ads' );
 		    //$updater->skin->feedback( 'downloading_package' );
 		    
 		    // if AJAX; show direct update link as first possible solution

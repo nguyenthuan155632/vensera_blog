@@ -118,10 +118,12 @@ class Advanced_Ads_Ad_Blocker
 		if ( ! isset( $this->options ) ) {
 			if ( function_exists( 'is_multisite' ) && is_multisite() ) {
 				global $current_site;
+				// Switch to main blog.
 				switch_to_blog( $current_site->blog_id );
 
 				$this->options = get_option( ADVADS_AB_SLUG, array() );
-				$advads_options = Advanced_Ads::get_instance()->options();
+				// Do not init options in the 'Advanced_Ads_Plugin' class.
+				$advads_options = (array) get_option( ADVADS_SLUG, array() );
 				$upload_dir = wp_upload_dir();
 
 				restore_current_blog();

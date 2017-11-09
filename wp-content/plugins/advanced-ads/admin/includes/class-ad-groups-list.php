@@ -135,8 +135,7 @@ class Advanced_Ads_Groups_List {
 		}
 		$new_ad_weights .= '</select>';
 
-		$file = ADVADS_BASE_PATH . 'admin/views/ad-group-list-form-row.php';
-		require($file);
+		require ADVADS_BASE_PATH . 'admin/views/ad-group-list-form-row.php';
 	}
 
 	/**
@@ -167,7 +166,21 @@ class Advanced_Ads_Groups_List {
 
 				$ad = new Advanced_Ads_Ad( get_the_ID() );
 				$expiry_date_format = get_option( 'date_format' ). ', ' . get_option( 'time_format' );
-				$post_start = get_the_date('U', $ad->id );
+				$post_start = get_the_date('Y-m-d H:i:s', $ad->id );
+				
+				$tz_option = get_option( 'timezone_string' );
+				if ( $tz_option ) {
+					$post_start = date_create( $post_start, Advanced_Ads_Admin::get_wp_timezone() );
+					$post_start = absint( $post_start->format( 'U' ) );
+				} else {
+					$post_start = date_create( $post_start );
+					$post_start = absint( $post_start->format( 'U' ) );
+					$tz_name = Advanced_Ads_Admin::timezone_get_name( Advanced_Ads_Admin::get_wp_timezone() );
+					$tz_offset = substr( $tz_name, 3 );
+					$off_time = date_create( '2017-09-21 T10:44:02' . $tz_offset );
+					$offset_in_sec = date_offset_get( $off_time );
+					$post_start -= $offset_in_sec;
+				}
 				
 				if ( $post_start > time() ) {
 					$line_output .= '<br />' . sprintf( __( 'starts %s', 'advanced-ads' ), date( $expiry_date_format, $post_start ) );
@@ -175,19 +188,15 @@ class Advanced_Ads_Groups_List {
 				if ( isset( $ad->expiry_date ) && $ad->expiry_date ) {
 					$expiry = $ad->expiry_date;
                     $expiry_date = date_create( '@' . $expiry );
-                    $tz_option = get_option( 'timezone_string' );
                     
                     if ( $tz_option ) {
                         $expiry_date->setTimezone( Advanced_Ads_Admin::get_wp_timezone() );
                     } else {
-                        $tz_name = Advanced_Ads_Admin::timezone_get_name( Advanced_Ads_Admin::get_wp_timezone() );
-                        $tz_offset = substr( $tz_name, 3 );
-                        $off_time = date_create( $expiry_date->format( 'Y-m-d\TH:i:s' ) . $tz_offset );
-                        $offset_in_sec = date_offset_get( $off_time );
                         $expiry_date = date_create( '@' . ( $expiry + $offset_in_sec ) );
                     }
-                    
+					
                     $TZ = ' ( ' . Advanced_Ads_Admin::timezone_get_name( Advanced_Ads_Admin::get_wp_timezone() ) . ' )';
+					
 					if ( $expiry > time() ) {
 						$line_output .= '<br />' . sprintf( __( 'expires %s', 'advanced-ads' ), $expiry_date->format( $expiry_date_format ) ) . $TZ;
 					} elseif ( $expiry <= time() ) {
@@ -203,6 +212,12 @@ class Advanced_Ads_Groups_List {
 
 			echo implode( '', $ads_output );
 			echo ($group->type == 'default' && $weight_sum) ? '</ul>' : '</ol>';
+			
+			if( $ads->post_count > 4 ){
+			    $hidden_ads = $ads->post_count - 3;
+			    echo '<p><a href="javascript:void(0)" class="advads-group-ads-list-show-more">+ ' . sprintf(__( 'show %d more ads', 'advanced-ads' ), $hidden_ads ) . '</a></p>';
+			}
+			
 			if ( $group->ad_count === 'all' ) {
 			    echo '<p>' . __( 'all published ads are displayed', 'advanced-ads' ) . '</p>';
 			} elseif ( $group->ad_count > 1 ) {
@@ -210,6 +225,7 @@ class Advanced_Ads_Groups_List {
 			}
 		} else {
 			_e( 'No ads assigned', 'advanced-ads' );
+			?><br/><a class="edit">+ <?php _e( 'Add some', 'advanced-ads' ); ?></a><?php
 		}
 		// Restore original Post Data
 		wp_reset_postdata();
@@ -309,7 +325,7 @@ class Advanced_Ads_Groups_List {
 				'group_id' => $group->id
 			);
 			$delete_link = self::group_page_url( $args );
-			$actions['delete'] = "<a class='delete-tag' href='" . wp_nonce_url( $delete_link, 'delete-tag_' . $group->id ) . "'>" . __( 'Delete' ) . '</a>';
+			$actions['delete'] = "<a class='delete-tag' href='" . wp_nonce_url( $delete_link, 'delete-tag_' . $group->id ) . "'>" . __( 'Delete', 'advanced-ads' ) . '</a>';
 		}
 
 		if ( ! count( $actions ) ) { return; }
@@ -319,6 +335,56 @@ class Advanced_Ads_Groups_List {
 			echo "<span class='$action'>$link</span>";
 		}
 		echo '</div>';
+	}
+	
+	/**
+	 * create a new group
+	 *
+	 */
+	public function create_group(){
+		// check nonce
+		if ( ! isset( $_POST['advads-group-add-nonce'] )
+			|| ! wp_verify_nonce( $_POST['advads-group-add-nonce'], 'add-advads-groups' ) ){
+
+			return new WP_Error( 'invalid_ad_group', __( 'Invalid Ad Group', 'advanced-ads' ) );
+		}
+
+		// check user rights
+		if( ! current_user_can( Advanced_Ads_Plugin::user_cap( 'advanced_ads_edit_ads') ) ) {
+			return new WP_Error( 'invalid_ad_group_rights', __( 'You don’t have permission to change the ad groups', 'advanced-ads' ) );
+		}
+
+		if ( isset($_POST['advads-group-name']) && '' !== $_POST['advads-group-name'] ){
+
+			$title = sanitize_text_field( $_POST['advads-group-name'] );
+			$new_group = wp_create_term( $title, Advanced_Ads::AD_GROUP_TAXONOMY );
+			
+			if( is_wp_error($new_group ) ){
+				return $new_group;
+			}
+			
+			// save default values
+			if( is_array( $new_group ) ){
+				$group = new Advanced_Ads_Group( $new_group['term_id'] );
+				
+				// allow other add-ons to save their own group attributes
+				$atts = apply_filters( 'advanced-ads-group-save-atts', array(
+					'type' => 'default',
+					'ad_count' => 0,
+					'options' => array(),
+				), $group);
+
+				$group->save( $atts );
+			}
+		    
+			// reload groups
+			$this->load_groups();
+
+		} else {
+			return new WP_Error( 'no_ad_group_created', __( 'No ad group created', 'advanced-ads' ) );
+		}
+
+		return true;
 	}
 
 	/**

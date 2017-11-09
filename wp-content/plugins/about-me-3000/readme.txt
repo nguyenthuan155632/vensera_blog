@@ -5,8 +5,9 @@ Donate Link: http://www.wpmaniax.com
 Plugin URL: http://www.wpmaniax.com/about-me-3000/
 Tags: about,about me,about us,widget,sidebar,biography,bio
 Requires at least: 3.8
-Tested up to: 4.3.1
-Stable tag: 2.2.3
+Tested up to: 4.8.2
+Requires PHP: 5.4
+Stable tag: 2.2.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
  
@@ -76,6 +77,10 @@ To configure:
 More screenshots and live sample you can see [here](http://www.wpmaniax.com/about-me-3000/)
 
 == Changelog ==
+
+= 2.2.4 =
+
+* minor compatibility changes
 
 = 2.2.3 =
 
@@ -194,6 +199,10 @@ More screenshots and live sample you can see [here](http://www.wpmaniax.com/abou
 * initial release 
 
 == Upgrade Notice ==
+
+= 2.2.4 =
+
+* minor compatibility changes
 
 = 2.2.3 =
 

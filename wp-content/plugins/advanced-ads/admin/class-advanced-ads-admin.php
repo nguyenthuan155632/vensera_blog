@@ -88,7 +88,8 @@ class Advanced_Ads_Admin {
 		$plugin = Advanced_Ads::get_instance();
 		$this->plugin_slug = $plugin->get_plugin_slug();
 		
-
+		add_action( 'current_screen', array( $this, 'current_screen' ) );
+		
 		// Load admin style sheet and JavaScript.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ), 9 );
@@ -98,18 +99,16 @@ class Advanced_Ads_Admin {
 		
 		// check for update logic
 		add_action( 'admin_notices', array($this, 'admin_notices') );
-		
-
-		// set 1 column layout on overview page as user and page option
-		add_filter( 'screen_layout_columns', array('Advanced_Ads_Overview_Widgets_Callbacks', 'one_column_overview_page') );
-		add_filter( 'get_user_option_screen_layout_toplevel_page_advanced', array( 'Advanced_Ads_Overview_Widgets_Callbacks', 'one_column_overview_page_user') );
-		
+				
 		// add links to plugin page
 		add_filter( 'plugin_action_links_' . ADVADS_BASE, array( $this, 'add_plugin_links' ) );
 		
 		// display information when user is going to disable the plugin
 		add_filter( 'admin_footer', array( $this, 'add_deactivation_logic' ) );
 		// add_filter( 'after_plugin_row_' . ADVADS_BASE, array( $this, 'display_deactivation_message' ) );
+		
+		// disable adding rel="noopener noreferrer" to link added through TinyMCE for rich content ads
+		add_filter( 'tiny_mce_before_init', array( $this, 'tinymce_allow_unsafe_link_target' ) );
 		
 		Advanced_Ads_Admin_Meta_Boxes::get_instance();
 		Advanced_Ads_Admin_Menu::get_instance();
@@ -125,6 +124,7 @@ class Advanced_Ads_Admin {
 		Advanced_Ads_Admin_Ad_Type::get_instance();
 		
 		add_action( 'wp_ajax_advads_send_feedback', array( $this, 'send_feedback' ) );
+		add_action( 'wp_ajax_advads_load_rss_widget_content', array( 'Advanced_Ads_Admin_Meta_Boxes', 'dashboard_widget_function_output' ) );
 	}
 	
 	/**
@@ -142,6 +142,25 @@ class Advanced_Ads_Admin {
 
 		return self::$instance;
 	}
+	
+	/**
+	 * general stuff after page is loaded and screen variable is available
+	 */
+	public function current_screen(){
+		$screen = get_current_screen();
+		
+		if( !isset( $screen->id ) ){
+			return;
+		}
+		
+		switch( $screen->id ){
+			case 'edit-advanced_ads' : // ad overview page
+			case 'advanced_ads' : // ad edit page
+			    // remove notice about missing first ad
+			    Advanced_Ads_Admin_Notices::get_instance()->remove_from_queue( 'nl_intro' );
+			    break;
+		}
+	}	
 
 	/**
 	 * Register and enqueue admin-specific style sheet.
@@ -168,6 +187,7 @@ class Advanced_Ads_Admin {
 
 		// global js script
 		wp_enqueue_script( $this->plugin_slug . '-admin-global-script', plugins_url( 'assets/js/admin-global.js', __FILE__ ), array('jquery'), ADVADS_VERSION );
+		wp_enqueue_script( $this->plugin_slug . '-admin-find-adblocker', plugins_url( 'assets/js/advertisement.js', __FILE__ ), array(), ADVADS_VERSION );
 
 		if( self::screen_belongs_to_advanced_ads() ){
 		    wp_register_script( $this->plugin_slug . '-admin-script', plugins_url( 'assets/js/admin.js', __FILE__ ), array( 'jquery', 'jquery-ui-autocomplete' , 'jquery-ui-button' ), ADVADS_VERSION );
@@ -232,7 +252,6 @@ class Advanced_Ads_Admin {
 			'toplevel_page_advanced-ads', // overview
 			'admin_page_advanced-ads-debug', // debug
 			'advanced-ads_page_advanced-ads-support', // support
-			'admin_page_advanced-ads-intro', // intro
 			'admin_page_advanced-ads-import-export', // import & export
 		));
 
@@ -353,15 +372,17 @@ class Advanced_Ads_Admin {
 	public function add_deactivation_logic(){
 	    
 		$screen = get_current_screen();
-		if( ! isset( $screen->id ) || 'plugins' !== $screen->id ){
+		if ( ! isset( $screen->id ) || ! in_array( $screen->id, array( 'plugins', 'plugins-network' ), true ) ) {
 			return;
 		}
 		
 		$current_user = wp_get_current_user();
 		if ( !($current_user instanceof WP_User) ){
+		    $from = '';
 		    $email = '';
 		} else {
-		    $email = trim( $current_user->user_email );
+		    $from = $current_user->user_nicename . ' <' . trim( $current_user->user_email ) . '>';
+		    $email = $current_user->user_email;
 		}
 		
 		include ADVADS_BASE_PATH . 'admin/views/feedback-disable.php';		
@@ -383,21 +404,66 @@ class Advanced_Ads_Admin {
 		    $text = implode( "\n\r", $form[ 'advanced_ads_disable_text' ] );
 		}
 		
+		// get first version to see if this is a new problem or might be an older on
+		$options = Advanced_Ads_Plugin::get_instance()->internal_options();
+		$installed = isset( $options['installed'] ) ? date( 'd.m.Y', $options['installed'] ) : '–';
+		
+		$text .= "\n\n" . home_url() . " ($installed)";
+		
 		$headers = array();
 		
 		$from = isset( $form['advanced_ads_disable_from'] ) ? $form['advanced_ads_disable_from'] : '';
+		// the user clicked on the "don’t disable" button or if an address is given in the form then use that one
+		if( ( isset( $_POST['feedback'] ) && $_POST['feedback'] && 'false' !== $_POST['feedback'] ) 
+			|| ( 
+			    isset( $form['advanced_ads_disable_reason'] ) 
+			    && in_array( $form['advanced_ads_disable_reason'], array( 'technical issue', 'get help' ) )
+			    && !empty( $form[ 'advanced_ads_disable_reply_email' ] ) ) )
+		{
+			$email = isset( $form[ 'advanced_ads_disable_reply_email' ] ) ? trim( $form[ 'advanced_ads_disable_reply_email' ] ) : $current_user->email;
+			$current_user = wp_get_current_user();
+			$name = ($current_user instanceof WP_User) ? $current_user->user_nicename : '';
+			$from = $name . ' <' . $email . '>';
+			$text .= "\n\n PLEASE REPLY";
+		}
 		if( $from ){
-		    $headers[] = "From: $from";
-		    $headers[] = "Reply-To: $from";
+			$headers[] = "From: $from";
+			$headers[] = "Reply-To: $from";
 		}
 		
 		$subject = isset( $form['advanced_ads_disable_reason'] ) ? $form['advanced_ads_disable_reason'] : '(no reason given)';
 	    
 		$success = wp_mail( 'improve@wpadvancedads.com', $subject, $text, $headers );
 		
-		// error_log(print_r($success, true));
-		
 		die();
 	    
-	}	
+	}
+	
+	public function tinymce_allow_unsafe_link_target( $mceInit ) {
+	    
+		// check if we are on the ad edit screen
+		if( ! function_exists( 'get_current_screen' ) ){
+		    return $mceInit;
+		}
+		
+		$screen = get_current_screen();
+		if( isset( $screen->id ) && $screen->id === 'advanced_ads' ) {
+			$mceInit['allow_unsafe_link_target'] = true;
+		}
+		
+		return $mceInit;
+	}   
+	
+	/**
+	 * sort visitor and display condition arrays alphabetically by their label
+	 * 
+	 * @since 1.8.12
+	 */
+	static function sort_condition_array_by_label( $a, $b ){
+		if( ! isset( $a['label'] ) || ! isset( $b['label'] ) ){
+		    return;
+		}
+		return strcmp( strtolower( $a['label'] ), strtolower( $b['label'] ) );
+	}
+
 }

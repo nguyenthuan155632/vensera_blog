@@ -7,9 +7,9 @@ function tonjoo_ecae_load_default(&$options){
 	if(!isset($options['excerpt_method'])){
 		$options['excerpt_method']='paragraph';
 	}
-	if(strpos($options['excerpt_method'],'-paragraph') && !function_exists('is_ecae_premium_exist')){
-		$options['excerpt_method']='paragraph';
-	}
+	// if(strpos($options['excerpt_method'],'-paragraph') && !function_exists('is_ecae_premium_exist')){
+	// 	$options['excerpt_method']='paragraph';
+	// }
 	if(!isset($options['show_image'])){
 		$options['show_image']='yes';		
 	}
@@ -98,6 +98,10 @@ function tonjoo_ecae_load_default(&$options){
 
 	if(!isset($options['readmore_inline'])){
 		$options['readmore_inline']='no';		
+	}
+
+	if(!isset($options['show_dots'])){
+		$options['show_dots']='no';		
 	}
 
 	if(!isset($options['read_more_align'])){

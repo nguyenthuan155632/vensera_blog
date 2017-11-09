@@ -4,7 +4,7 @@ Plugin Name: About Me 3000
 Plugin URI: http://www.wpmaniax.com/about-me-3000/
 Description: Add an "About Me" widget to your sidebar.
 Author: Csaba Kissi
-Version: 2.2.3
+Version: 2.2.4
 Author URI: http://www.wpmaniax.com
 */
 

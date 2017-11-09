@@ -47,6 +47,7 @@ class Advanced_Ads_Admin_Ad_Type {
 
 		$this->post_type = constant( 'Advanced_Ads::POST_TYPE_SLUG' );
 
+		add_filter( 'gettext', array( $this, 'replace_cheating_message' ), 20, 2 );
 	}
 
 	/**
@@ -62,7 +63,7 @@ class Advanced_Ads_Admin_Ad_Type {
 
 		return self::$instance;
 	}
-
+	
 	/**
 	 * add heading for extra column of ads list
 	 * remove the date column
@@ -178,14 +179,14 @@ class Advanced_Ads_Admin_Ad_Type {
 			return;
 		}
 
-		$timing_filter = apply_filters( 'advanced-ads-ad-list-timing-column-filter', array(
-			'advads-filter-expired' => __( 'expired', 'advanced-ads' ),
-			'advads-filter-any-exp-date' => __( 'any expiry date', 'advanced-ads' ),
-			'advads-filter-future' => __( 'planned', 'advanced-ads' )
-		) );
+			$timing_filter = apply_filters( 'advanced-ads-ad-list-timing-column-filter', array(
+				'advads-filter-expired' => __( 'expired', 'advanced-ads' ),
+				'advads-filter-any-exp-date' => __( 'any expiry date', 'advanced-ads' ),
+				'advads-filter-future' => __( 'planned', 'advanced-ads' )
+			) );
 
-		include ADVADS_BASE_PATH . 'admin/views/ad-list-filters.php';
-	}
+			include ADVADS_BASE_PATH . 'admin/views/ad-list-filters.php';
+		}
 
 	/**
 	 * edit ad bulk update messages
@@ -201,11 +202,11 @@ class Advanced_Ads_Admin_Ad_Type {
 		$post = get_post();
 
 		$messages[Advanced_Ads::POST_TYPE_SLUG] = array(
-			'updated'   => _n( '%s ad updated.', '%s ads updated.', $counts['updated'] ),
-			'locked'    => _n( '%s ad not updated, somebody is editing it.', '%s ads not updated, somebody is editing them.', $counts['locked'] ),
-			'deleted'   => _n( '%s ad permanently deleted.', '%s ads permanently deleted.', $counts['deleted'] ),
-			'trashed'   => _n( '%s ad moved to the Trash.', '%s ads moved to the Trash.', $counts['trashed'] ),
-			'untrashed' => _n( '%s ad restored from the Trash.', '%s ads restored from the Trash.', $counts['untrashed'] ),
+			'updated'   => _n( '%s ad updated.', '%s ads updated.', $counts['updated'], 'advanced-ads' ),
+			'locked'    => _n( '%s ad not updated, somebody is editing it.', '%s ads not updated, somebody is editing them.', $counts['locked'], 'advanced-ads' ),
+			'deleted'   => _n( '%s ad permanently deleted.', '%s ads permanently deleted.', $counts['deleted'], 'advanced-ads' ),
+			'trashed'   => _n( '%s ad moved to the Trash.', '%s ads moved to the Trash.', $counts['trashed'], 'advanced-ads' ),
+			'untrashed' => _n( '%s ad restored from the Trash.', '%s ads restored from the Trash.', $counts['untrashed'], 'advanced-ads' ),
 		);
 
 		return $messages;
@@ -240,13 +241,15 @@ class Advanced_Ads_Admin_Ad_Type {
 		if ( ! isset( $screen->id ) || $screen->id !== 'edit-advanced_ads' ) {
 			return;
 		}
-
+		
 		// get number of ads
-		$recent_ads = Advanced_Ads::get_instance()->get_model()->get_ads();
+		$existing_ads = Advanced_Ads::get_number_of_ads();
 
 		// only display if there are no more than 2 ads
-		if( 3 > count( $recent_ads ) ){
+		if( 3 > $existing_ads ){
+		    echo '<div class="advads-ad-metabox postbox" style="clear: both; margin: 10px 20px 0 2px;">';
 		    include ADVADS_BASE_PATH . 'admin/views/ad-list-no-ads.php';
+		    echo '</div>';
 		}
 	}
 
@@ -394,12 +397,22 @@ class Advanced_Ads_Admin_Ad_Type {
 		if ( ! isset($post->post_type) || $post->post_type != $this->post_type ) {
 			return;
 		}
+		
+		// highlight Dummy ad if this is the first ad
+		if( ! Advanced_Ads::get_instance()->get_number_of_ads() ){
+			?><style>.advanced-ads-type-list-dummy { font-weight: bold; }</style><?php
+		}
+
+		
 		$ad = new Advanced_Ads_Ad( $post->ID );
 
 		$placement_types = Advanced_Ads_Placements::get_placement_types();
 		$placements = Advanced_Ads::get_ad_placements_array(); // -TODO use model
 
+		// display general and wizard information
 		include ADVADS_BASE_PATH . 'admin/views/ad-info-top.php';
+		// display ad injection information
+		include ADVADS_BASE_PATH . 'admin/views/placement-injection-top.php';
 	}
 
 	/**
@@ -488,8 +501,8 @@ class Advanced_Ads_Admin_Ad_Type {
 			4  => __( 'Ad updated.', 'advanced-ads' ),
 			/* translators: %s: date and time of the revision */
 			5  => isset( $_GET['revision'] ) ? sprintf( __( 'Ad restored to revision from %s', 'advanced-ads' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => __( 'Ad published.', 'advanced-ads' ) . ' ' . sprintf(__( 'Ad not showing up? Take a look <a href="%s" target="_blank">here</a>', 'advanced-ads' ), ADVADS_URL . 'manual/ads-not-showing-up/#utm_source=advanced-ads&utm_medium=link&utm_campaign=edit-ad-not-visible'),
-			7  => __( 'Ad saved.', 'advanced-ads' ),
+			6  => __( 'Ad saved.', 'advanced-ads' ), // published
+			7  => __( 'Ad saved.', 'advanced-ads' ), // saved
 			8  => __( 'Ad submitted.', 'advanced-ads' ),
 			9  => sprintf(
 				__( 'Ad scheduled for: <strong>%1$s</strong>.', 'advanced-ads' ),
@@ -570,6 +583,23 @@ class Advanced_Ads_Admin_Ad_Type {
 
 		libxml_use_internal_errors( $libxml_previous_state );
 		return $errors;
+	}
+
+	/**
+	 * Replace 'Cheatin&#8217; uh?' message if user role does not have required permissions.
+	 *
+	 * @param string $translation   Translated text.
+	 * @param string $text          Text to translate.
+	 * @return string $translation  Translated text.
+	 */
+	public function replace_cheating_message( $translated_text, $untranslated_text ) {
+		global $typenow;
+
+		if ( isset( $typenow ) && $untranslated_text === 'Cheatin&#8217; uh?' && $typenow === $this->post_type ) {
+			$translated_text = __( 'You don’t have access to ads. Please deactivate and re-enable Advanced Ads again to fix this.', 'advanced-ads' );
+		}
+
+		return $translated_text;
 	}
 
 }

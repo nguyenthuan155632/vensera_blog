@@ -337,37 +337,44 @@ class Advanced_Ads_Plugin {
 	}
 
 	/**
-	 * Prepare attributes by converting strings to multi-dimensional array
-	 * Example: [ 'output__margin__top' => 1 ]  =>  ['output']['margin']['top'] = 1
+	 * Prepare shortcode attributes.
 	 *
 	 * @param array $atts array with strings
 	 * @return array
 	 */
 	private function prepare_shortcode_atts( $atts ) {
-		if ( defined( 'ADVANCED_ADS_DISABLE_CHANGE' ) && ADVANCED_ADS_DISABLE_CHANGE ) {
-			return array();
-		}
-
 		$result = array();
 
-		foreach ( $atts as $attr => $data  ) {
-			$levels = explode( '__', $attr );
-			$last = array_pop( $levels );
+		/**
+		 * Prepare attributes by converting strings to multi-dimensional array
+		 * Example: [ 'output__margin__top' => 1 ]  =>  ['output']['margin']['top'] = 1
+		 */
+		if ( ! defined( 'ADVANCED_ADS_DISABLE_CHANGE' ) || ! ADVANCED_ADS_DISABLE_CHANGE ) {
+			foreach ( $atts as $attr => $data  ) {
+				$levels = explode( '__', $attr );
+				$last = array_pop( $levels );
 
-			$cur_lvl = &$result;
+				$cur_lvl = &$result;
 
-			foreach ( $levels as $lvl ) {
-				if ( ! isset( $cur_lvl[ $lvl ] ) ) {
-					$cur_lvl[ $lvl ] = array();
+				foreach ( $levels as $lvl ) {
+					if ( ! isset( $cur_lvl[ $lvl ] ) ) {
+						$cur_lvl[ $lvl ] = array();
+					}
+
+					$cur_lvl = &$cur_lvl[ $lvl ];
 				}
 
-				$cur_lvl = &$cur_lvl[ $lvl ];
+				$cur_lvl[ $last ] = $data;
 			}
 
-			$cur_lvl[ $last ] = $data;
+			$result = array_diff_key( $result, array( 'id' => false, 'blog_id' => false, 'ad_args' => false ) );
 		}
 
-		$result = array_diff_key( $result, array( 'id' => false, 'blog_id' => false ) );
+		// Ad type: 'content' and a shortcode inside.
+		if ( isset( $atts['ad_args'] ) ) {
+			$result = array_merge( $result, json_decode( urldecode( $atts['ad_args'] ) ,true) );
+
+		}
 
 		return $result;
 	}
@@ -424,6 +431,8 @@ class Advanced_Ads_Plugin {
 		    if($this->internal_options === array()){
 			$this->internal_options = $defaults;
 			$this->update_internal_options($this->internal_options);
+
+			Advanced_Ads_Plugin::get_instance()->create_capabilities();
 		    }
 
 		    // for versions installed prior to 1.5.3 set installed date for now

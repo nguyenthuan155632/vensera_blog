@@ -62,7 +62,7 @@ class Advanced_Ads_Filesystem {
 		}
 
 		if ( is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->get_error_code() ) {
-			return new WP_Error( 'fs_error', __( 'Filesystem error.' ), $wp_filesystem->errors);
+			return new WP_Error( 'fs_error', __( 'Filesystem error.', 'advanced-ads' ), $wp_filesystem->errors);
 		}
 
 		foreach ( (array) $directories as $dir ) {
@@ -101,10 +101,6 @@ class Advanced_Ads_Filesystem {
 	 * Print the filesystem credentials modal when needed.
 	 */
 	public function print_request_filesystem_credentials_modal() {
-		if ( function_exists( 'wp_print_request_filesystem_credentials_modal' ) ) {
-			return wp_print_request_filesystem_credentials_modal();
-		}
-
 		$filesystem_method = get_filesystem_method();
 		ob_start();
 		$filesystem_credentials_are_stored = request_filesystem_credentials( self_admin_url() );
@@ -114,7 +110,7 @@ class Advanced_Ads_Filesystem {
 			return;
 		}
 		?>
-		<div id="request-filesystem-credentials-dialog" class="notification-dialog-wrap request-filesystem-credentials-dialog">
+		<div id="advanced-ads-rfc-dialog" class="notification-dialog-wrap request-filesystem-credentials-dialog">
 			<div class="notification-dialog-background"></div>
 			<div class="notification-dialog" role="dialog" aria-labelledby="request-filesystem-credentials-title" tabindex="0">
 				<div class="request-filesystem-credentials-dialog-content">

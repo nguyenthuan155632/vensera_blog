@@ -37,10 +37,7 @@ jQuery( document ).ready(function () {
 		    messagebox.fadeOut();
 		} else {
 		    messagebox.find('p').html(r);
-		    // don’t change class on intro page
-		    if( ! jQuery('.admin_page_advanced-ads-intro').length ){
-			    messagebox.removeClass('updated').addClass('error');
-		    }
+		    messagebox.removeClass('updated').addClass('error');
 		}
 	    });
 
@@ -68,16 +65,24 @@ jQuery( document ).ready(function () {
 		// show text field if there is one
 		jQuery(this).parents('li').next('li').children('input[type="text"], textarea').show();
 	});
+	// handle technical issue feedback in particular
+	jQuery('#advanced-ads-feedback-content .advanced_ads_disable_technical_issue input[type="radio"]').click(function () {
+		// show text field if there is one
+		jQuery(this).parents('li').siblings('.advanced_ads_disable_reply').show();
+	});
 	// send form or close it
 	jQuery('#advanced-ads-feedback-content .button').click(function ( e ) {
 		e.preventDefault();
+		var self = jQuery( this );
 		// set cookie for 30 days
 		var exdate = new Date();
 		exdate.setSeconds( exdate.getSeconds() + 2592000 );
 		document.cookie = "advads_hide_deactivate_feedback=1; expires=" + exdate.toUTCString() + "; path=/";
+		// save if plugin should be disabled
+		var disable_plugin = self.hasClass('advanced-ads-feedback-not-deactivate') ? false : true;
 			
 		jQuery( '#advanced-ads-feedback-overlay' ).hide();
-		if ( 'advanced-ads-feedback-submit' === this.id ) {
+		if ( self.hasClass('advanced-ads-feedback-submit') ) {
 			// show text field if there is one
 			jQuery.ajax({
 			    type: 'POST',
@@ -85,12 +90,16 @@ jQuery( document ).ready(function () {
 			    dataType: 'json',
 			    data: {
 				action: 'advads_send_feedback',
+				feedback: self.hasClass('advanced-ads-feedback-not-deactivate') ? true : false,
 				formdata: jQuery( '#advanced-ads-feedback-content form' ).serialize()
 			    },
 			    complete: function (MLHttpRequest, textStatus, errorThrown) {
 				    // deactivate the plugin and close the popup
 				    jQuery( '#advanced-ads-feedback-overlay' ).remove();
-				    window.location.href = advads_deactivate_link_url;
+				    console.log( disable_plugin );
+				    if( disable_plugin ){
+					window.location.href = advads_deactivate_link_url;
+				    }
 
 			    }
 			});
@@ -99,9 +108,10 @@ jQuery( document ).ready(function () {
 			window.location.href = advads_deactivate_link_url;
 		}
 	});
-	// close form without doing anything
-	jQuery('.advanced-ads-feedback-not-deactivate').click(function ( e ) {
+	// close form and disable the plugin without doing anything
+	jQuery('.advanced-ads-feedback-only-deactivate').click(function ( e ) {
 		jQuery( '#advanced-ads-feedback-overlay' ).hide();
+		window.location.href = advads_deactivate_link_url;
 	});
 
 });
@@ -118,4 +128,27 @@ function advads_admin_get_cookie (name) {
 			return unescape( y );
 		}
 	}
+}
+
+/**
+ * load RSS widget on dashboard page using AJAX to not block rendering the rest of the page
+ */
+function advads_load_dashboard_rss_widget_content(){
+	jQuery.ajax({
+		type: 'POST',
+		url: ajaxurl,
+		data: {
+		    action: 'advads_load_rss_widget_content',
+		},
+		success: function (data, textStatus, XMLHttpRequest) {
+			if (data) {
+				jQuery( '#advads-dashboard-widget-placeholder' ).before( data );
+			}
+		},
+		complete: function (MLHttpRequest, textStatus, errorThrown) {
+			// remove the placeholder
+			jQuery( '#advads-dashboard-widget-placeholder' ).remove();
+
+		}
+	});
 }

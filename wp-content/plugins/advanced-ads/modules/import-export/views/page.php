@@ -25,7 +25,7 @@ class_exists( 'Advanced_Ads', false ) || exit();
 			<p><label><input type="checkbox" name="content[]" value="placements" checked="checked" /> <?php _e( 'Placements', 'advanced-ads' ); ?></label></p>
 			<p><label><input type="checkbox" name="content[]" value="options" checked="checked" /> <?php _e( 'Options', 'advanced-ads' ); ?></label></p>
 		</fieldset>
-		<?php submit_button( __( 'Download Export File' ) ); ?>
+		<?php submit_button( __( 'Download Export File', 'advanced-ads' ) ); ?>
 	</form>
 
 
@@ -49,12 +49,12 @@ class_exists( 'Advanced_Ads', false ) || exit();
 			<?php
 			if ( ! empty( $upload_dir['error'] ) ) : ?>
 				<p class="advads-error-message">
-					<?php _e( 'Before you can upload your import file, you will need to fix the following error:' ); ?>
+					<?php _e( 'Before you can upload your import file, you will need to fix the following error:', 'advanced-ads' ); ?>
 					<strong><?php echo $upload_dir['error']; ?>guu</strong>
 				</p>
 			<?php else: ?>
 				<p>
-					<input type="file" id="upload" name="import" size="25" /> (<?php printf( __( 'Maximum size: %s' ), $size ); ?>)
+					<input type="file" id="upload" name="import" size="25" /> (<?php printf( __( 'Maximum size: %s', 'advanced-ads' ), $size ); ?>)
 					<input type="hidden" name="max_file_size" value="<?php echo $bytes; ?>" />
 				</p>
 			<?php endif; ?>

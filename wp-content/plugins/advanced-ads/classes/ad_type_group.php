@@ -98,11 +98,10 @@ class Advanced_Ads_Ad_Type_Group extends Advanced_Ads_Ad_Type_Abstract{
 	 * @return str $content ad content prepared for frontend output
 	 */
 	public function prepare_output($ad){
-
 		$group_id = ( isset( $ad->output['group_id'] ) ) ? absint( $ad->output['group_id'] ) : 0;
 
 		if( $group_id ){
-		    return get_ad_group( $group_id );
+		    return get_ad_group( $group_id, $ad->args );
 		}
 	}
 

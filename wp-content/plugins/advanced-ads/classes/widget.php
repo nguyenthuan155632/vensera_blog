@@ -58,7 +58,7 @@ class Advanced_Ads_Widget extends WP_Widget {
 		$title = strip_tags( $instance['title'] );
 		$elementid = $instance['item_id'];
 
-		?><p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label>
+		?><p><label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'advanced-ads' ); ?></label>
             <input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" /></p><?php
 
 			$items = array_merge( self::items_for_select(), self::widget_placements_for_select() );

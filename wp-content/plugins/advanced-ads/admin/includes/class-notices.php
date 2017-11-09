@@ -159,17 +159,20 @@ class Advanced_Ads_Admin_Notices {
 		$options = $this->options();
 		$closed = isset($options['closed']) ? $options['closed'] : array();
 		$queue = isset($options['queue']) ? $options['queue'] : array();
-
+		
 		// register intro message
 		if( $options === array() && ! in_array( 'nl_intro', $queue ) && ! isset( $closed['nl_intro'] ) ){
 			$this->notices[] = 'nl_intro';
 		}
 		// offer free add-ons if not yet subscribed
 		if ( ! $this->is_subscribed() && ! in_array( 'nl_free_addons', $queue ) && ! isset( $closed['nl_free_addons'] )) {
-			$this->notices[] = 'nl_free_addons';
+			// get number of ads
+			if( Advanced_Ads::get_number_of_ads() ){
+				$this->notices[] = 'nl_free_addons';
+			}
 		}
-		// ask for a review after 30 days
-		if ( 2592000 < ( time() - $activation) && ! in_array( 'review', $queue ) && ! isset( $closed['review'] )) {
+		// ask for a review after 5 days
+		if ( 432000 < ( time() - $activation) && ! in_array( 'review', $queue ) && ! isset( $closed['review'] )) {
 			$this->notices[] = 'review';
 		}
 	}
@@ -193,15 +196,6 @@ class Advanced_Ads_Admin_Notices {
 		    }
 		} else {
 		    $this->remove_from_queue( 'license_invalid' );
-		}
-
-		// check expiring licenses
-		if ( Advanced_Ads_Checks::licenses_expire() ){
-		    if( ! in_array( 'license_expires', $queue )) {
-			$this->notices[] = 'license_expires';
-		    }
-		} else {
-			$this->remove_from_queue( 'license_expires' );
 		}
 
 		// check expired licenses
@@ -307,6 +301,8 @@ class Advanced_Ads_Admin_Notices {
 		// only update if changed
 		if( $options_before !== $options ){
 		    $this->update_options( $options );
+		    // update already registered notices
+		    $this->load_notices();
 		}
 	}
 

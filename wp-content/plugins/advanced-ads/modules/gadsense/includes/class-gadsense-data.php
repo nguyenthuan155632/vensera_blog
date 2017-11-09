@@ -29,6 +29,9 @@ class Advanced_Ads_AdSense_Data {
 	    $options['page-level-enabled'] = false;
 	    
 	}
+	if ( ! isset( $options['background'] ) ) {
+		$options['background'] = false;
+	}
 
 	$this->options = $options;
 

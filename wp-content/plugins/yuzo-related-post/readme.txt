@@ -6,9 +6,9 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Author URI: http://ilentheme.com
 Author: iLen
 Requires at least: 4.0
-Tested up to: 4.6.1
-Stable tag: 5.12.66
-Version: 5.12.69
+Tested up to: 4.7.4
+Stable tag: 5.12.69
+Version: 5.12.70
 License: GPLv2
 
 Related posts a so easy and fast
@@ -61,6 +61,9 @@ Gives shape and life to your post with 'Yuzo related post' ;)
 
 
 == Changelog ==
+= 5.12.70 =
+* Improve: Security improvements according to <code>http://defensecode.com/</code>
+
 = 5.12.69 =
 * Improve: Added the option within the 'Categories that can be related or want to be displayed' widget with this you can show posts in the widget only one or more categories.
 

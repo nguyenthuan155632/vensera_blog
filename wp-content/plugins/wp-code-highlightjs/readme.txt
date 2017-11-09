@@ -2,8 +2,8 @@
 Donate link: https://github.com/owt5008137/WP-Code-Highlight.js/#donate
 Tags: source, code, highlight, sourcecode, highlighter, plugin, syntax, SyntaxHighlighter, prettify, pandoc, stackedit, typora, source, markdown
 Requires at least: 3.3
-Tested up to: 4.7.2
-Stable tag: 0.5.17
+Tested up to: 4.8.0
+Stable tag: 0.6.2
 
 This plugin allow you to use [highlight.js](https://highlightjs.org) to highlight codes on any wordpress page.
 And you can easily migrate from SynaxHighlight, Google Prettify or CrayonSyntaxHighlighter without change
@@ -65,6 +65,17 @@ Just have fun.
 7. Sample: Syntax Highlighter Compatiable Mode
 
 == Changelog ==
+
+= 0.6.2
+1. merge [PR #24](https://github.com/owt5008137/WP-Code-Highlight.js/pull/24), thanks to [Ivan Akulov](http://iamakulov.com)
+
+= 0.6.1
+1. fix missing languages for highlight.js 9.12.0
+
+= 0.6.0
+1. report warning when we has no writing access to the plugin directory
+2. fix [issue #22](https://github.com/owt5008137/WP-Code-Highlight.js/issues/22). thanks to [Daredzik](https://github.com/Daredzik)
+3. update highlight.js to 9.12.0
 
 = 0.5.18
 1. update highlight.js to 9.10.0

@@ -42,8 +42,6 @@ class Advanced_Ads_Visitor_Conditions {
 				'check' => array( 'Advanced_Ads_Visitor_Conditions', 'check_logged_in' ) // callback for frontend check
 			),
 	    ));
-
-	    ksort( $this->conditions );
 	}
 
 	/**
@@ -58,6 +56,18 @@ class Advanced_Ads_Visitor_Conditions {
 
 		return self::$instance;
 	}
+	
+	
+	/**
+	 * get the conditions array alphabetically by label
+	 * 
+	 * @since 1.8.12
+	 */
+	public function get_conditions(){
+		uasort( $this->conditions, 'Advanced_Ads_Admin::sort_condition_array_by_label' );
+		
+		return $this->conditions;
+	}	
 
 	/**
 	 * callback to render the mobile condition using the "is not" condition
@@ -95,7 +105,7 @@ class Advanced_Ads_Visitor_Conditions {
 	    if ( ! isset ( $options['type'] ) || '' === $options['type'] ) { return; }
 
 	    if( ! defined( 'AAR_SLUG' ) ){
-		    echo '<p>' . sprintf(__( 'Display ads by the available space on the device or target tablets with the <a href="%s" target="_blank">Responsive add-on</a>', ADVADS_SLUG ), ADVADS_URL . 'add-ons/responsive-ads/#utm_source=advanced-ads&utm_medium=link&utm_campaign=edit-visitor-responsive') . '</p>';
+		    echo '<p>' . sprintf(__( 'Display ads by the available space on the device or target tablets with the <a href="%s" target="_blank">Responsive add-on</a>', 'advanced-ads' ), ADVADS_URL . 'add-ons/responsive-ads/#utm_source=advanced-ads&utm_medium=link&utm_campaign=edit-visitor-responsive') . '</p>';
 	    }
 	}
 	
@@ -123,8 +133,8 @@ class Advanced_Ads_Visitor_Conditions {
 
 	    ?><input type="hidden" name="<?php echo $name; ?>[type]" value="<?php echo $options['type']; ?>"/>
 		<select name="<?php echo $name; ?>[operator]">
-		<option value="is" <?php selected( 'is', $operator ); ?>><?php _e( 'is' ); ?></option>
-		<option value="is_not" <?php selected( 'is_not', $operator ); ?>><?php _e( 'is not' ); ?></option>
+		<option value="is" <?php selected( 'is', $operator ); ?>><?php _e( 'is', 'advanced-ads' ); ?></option>
+		<option value="is_not" <?php selected( 'is_not', $operator ); ?>><?php _e( 'is not', 'advanced-ads' ); ?></option>
 	    </select>
 	    <p class="description"><?php echo $type_options[ $options['type'] ]['description']; 
 	    if( isset( $type_options[ $options['type'] ]['helplink'] ) ) : ?>

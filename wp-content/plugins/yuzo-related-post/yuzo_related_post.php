@@ -4,7 +4,7 @@ Plugin Name: Related Posts
 Plugin URI: https://wordpress.org/plugins/yuzo-related-post/
 Description: Related posts so easy and fast
 Tags: related posts,related post,related content,popular posts,last post, most views, widget,related page,content,associate page, associate post
-Version: 5.12.69
+Version: 5.12.70
 Author: iLen
 Author URI: http://ilentheme.com
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd =_s-xclick&hosted_button_id=MSRAUBMB5BZFU
